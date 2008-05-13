@@ -1,0 +1,21 @@
+<draw width="10" height='10'>
+
+  <!--
+      Draw out the framing circle which is the full 10 meters across.
+  -->
+
+  <circle
+      x="0" y="0"
+      fill-color="#ffffff" line-color="#666666"
+      radius="5"/>
+
+  <circle
+      x="2" y="2"
+      fill-color="#eebbcc" line-color="#000000"
+      radius="2"/>
+
+  <circle
+      x="-2" y="0"
+      fill-color="#369782" line-color="none"
+      radius="0.75"/>
+</draw>

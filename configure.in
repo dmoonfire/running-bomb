@@ -1,0 +1,74 @@
+AC_INIT([mfgames-running-bomb], 0.0.0, [contact@mfgames.com])
+AC_PREREQ(2.53)
+AM_INIT_AUTOMAKE(mfgames-running-bomb, 0.0.0)
+AM_MAINTAINER_MODE
+
+ASSEMBLY_VERSION=0.0.0.0
+
+MONO_REQUIRED_VERSION=2.6
+PKG_CHECK_MODULES(mono_specific,
+	mono >= $MONO_REQUIRED_VERSION,
+	has_mono=true, has_mono=false)
+
+AC_PATH_PROG(GACUTIL, gacutil, no)
+if test "x$GACUTIL" = "xno" ; then
+	AC_MSG_ERROR([No gacutil tool found. You need to install either the mono or .Net SDK.])
+fi
+
+if test "x$has_mono" = "xtrue"; then
+GACUTIL_FLAGS='-check_refs /gacdir $(DESTDIR)$(prefix)/lib'
+fi
+
+AC_PATH_PROG(MONO, mono)
+AC_PATH_PROG(GMCS, gmcs)
+AC_PATH_PROG(CSC, gmcs)
+
+if test "x$MONO" = "x" ; then
+  AC_MSG_ERROR([Can't find "mono" in your PATH])
+fi
+
+if test "x$GMCS" = "x" ; then
+  AC_MSG_ERROR([Can't find "gmcs" in your PATH])
+fi
+
+AC_SUBST(PATH)
+AC_SUBST(LD_LIBRARY_PATH)
+
+dnl Find pkg-config
+AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+if test "x$PKG_CONFIG" = "xno"; then
+        AC_MSG_ERROR([You need to install pkg-config])
+fi
+
+dnl MfGames.Utility
+PKG_CHECK_MODULES(mfgames_utility, mfgames-utility-3.0)
+
+dnl BooGame
+
+dnl Tao Framework
+PKG_CHECK_MODULES(tao_opengl, tao-opengl-2.1)
+PKG_CHECK_MODULES(tao_sdl, tao-sdl-1.2)
+PKG_CHECK_MODULES(tao_devil, tao-devil-1.6)
+PKG_CHECK_MODULES(tao_freeglut, tao-freeglut-2.4)
+PKG_CHECK_MODULES(tao_physfs, tao-physfs-1.0)
+PKG_CHECK_MODULES(tao_openal, tao-openal-1.1)
+PKG_CHECK_MODULES(tao_freetype, tao-freetype-0.0)
+
+dnl Other Stuff
+AC_SUBST(LIB_SUFFIX)
+AC_SUBST(LIB_PREFIX)
+AC_SUBST(ASSEMBLY_VERSION)
+AC_SUBST(CSC_FLAGS)
+AC_SUBST(GACUTIL_FLAGS)
+
+AC_OUTPUT([
+Makefile
+])
+
+echo ""
+echo "Configuration summary:"
+echo "  * Installation prefix = $prefix"
+echo "  *         C# compiler = $CSC"
+echo "  *           CSC Flags = $CSC_FLAGS"
+echo "  *       Mono-specific = $has_mono"
+echo "  *             gacutil = $GACUTIL_FLAGS"
