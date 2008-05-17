@@ -4,13 +4,13 @@ using MfGames.Utility;
 using System;
 using System.IO;
 
-namespace MfGames.RunningBomb.GtkDrawer
+namespace MfGames.RunningBomb.GtkTunneler
 {
 	/// <summary>
 	/// The primary window for the application, this contains the menu
 	/// bars, status windows, and the Cairo display.
 	/// </summary>
-	public class GtkDrawerFrame
+	public class GtkTunnelerFrame
 	: Window
 	{
 		#region Constructors
@@ -18,8 +18,8 @@ namespace MfGames.RunningBomb.GtkDrawer
 		/// Constructs the primary window, builds the UI, and connects the
 		/// standard eventing.
 		/// </summary>
-		public GtkDrawerFrame()
-			: base("Moonfire Games' Running Bomb (Drawer)")
+		public GtkTunnelerFrame()
+			: base("Moonfire Games' Running Bomb (Tunneler)")
 		{
 			// Create the basic UI elements
 			VBox innerBox = new VBox(false, 0);
@@ -30,14 +30,11 @@ namespace MfGames.RunningBomb.GtkDrawer
 			innerBox.PackStart(uim.GetWidget("/MenuBar"), false, false, 0);
 
 			// Add the canvas
-			canvas = new GtkDrawerCanvas();
+			canvas = new GtkTunnelerCanvas();
 			innerBox.PackStart(canvas, true, true, 0);
 
 			// Connect the basic events
 			DeleteEvent += OnDelete;
-
-			// Create a new form
-			File = new FileInfo("../assets/themes/default/engine.xml");
 
 			// Set our default size
 			SetDefaultSize(640, 480);
@@ -45,7 +42,7 @@ namespace MfGames.RunningBomb.GtkDrawer
 		#endregion
 
 		#region UI Creation
-		private GtkDrawerCanvas canvas;
+		private GtkTunnelerCanvas canvas;
 		private UIManager uim;
 
 		/// <summary>
@@ -59,8 +56,10 @@ namespace MfGames.RunningBomb.GtkDrawer
 				new ActionEntry("FileMenu", null, "_File", null,
 					null, null),
 
-				new ActionEntry("Reload", null, "Re_load", "<control>R",
-					"Reload", new EventHandler(OnReload)),
+				new ActionEntry("Reload", null, "Re_load", "<control>L",
+					"Reload everything", new EventHandler(OnReload)),
+				new ActionEntry("Rebuild", null, "Re_build", "<control>B",
+					"Rebuild the entire map", new EventHandler(OnRebuild)),
 				new ActionEntry("ZoomIn", null, "Zoom _In", "<control>I",
 					"Zoom In", new EventHandler(OnZoomIn)),
 				new ActionEntry("ZoomOut", null, "Zoom _Out", "<control>O",
@@ -97,13 +96,19 @@ namespace MfGames.RunningBomb.GtkDrawer
 		}
 
 		/// <summary>
-		/// Reloads the file.
+		/// Resets the entire junction.
+		/// </summary>
+		private void OnRebuild(object o, EventArgs e)
+		{
+			canvas.Rebuild();
+		}
+
+		/// <summary>
+		/// Reloads the entire junction without changing it.
 		/// </summary>
 		private void OnReload(object o, EventArgs e)
 		{
-			DrawingCommandsReader dcr = new DrawingCommandsReader();
-			canvas.DrawingCommands = dcr.Read(_file);
-			canvas.QueueDraw();
+			canvas.Reload();
 		}
 
 		/// <summary>
@@ -111,7 +116,7 @@ namespace MfGames.RunningBomb.GtkDrawer
 		/// </summary>
 		private void OnZoomIn(object o, EventArgs e)
 		{
-			canvas.Scale += 0.5f;
+			canvas.Scale *= 2;
 			canvas.QueueDraw();
 		}
 
@@ -120,7 +125,7 @@ namespace MfGames.RunningBomb.GtkDrawer
 		/// </summary>
 		private void OnZoomOut(object o, EventArgs e)
 		{
-			canvas.Scale -= 0.5f;
+			canvas.Scale /= 2;
 			canvas.QueueDraw();
 		}
 
@@ -131,66 +136,6 @@ namespace MfGames.RunningBomb.GtkDrawer
 		{
 			canvas.Scale = 1;
 			canvas.QueueDraw();
-		}
-		#endregion
-
-		#region File Loading
-		private FileSystemWatcher watcher;
-
-		/// <remarks>
-		/// The File property sets up additional processes.
-		/// </remarks>
-		private FileInfo _file;
-
-		/// <summary>
-		public FileInfo File
-		{
-			get { return _file; }
-			set
-			{
-				// Set the value
-				_file = value;
-
-				// Check for nulls
-				if (_file == null && watcher == null)
-					return;
-
-				// Set up the watcher
-				if (watcher == null)
-				{
-					watcher = new FileSystemWatcher();
-					watcher.Changed += OnFileSystemChanged;
-				}
-
-				// See if we should raise events
-				watcher.EnableRaisingEvents = _file != null;
-
-				// If we aren't null, set up the internals
-				if (_file != null)
-				{
-					// Set up the commands
-					DrawingCommandsReader dcr = new DrawingCommandsReader();
-					canvas.DrawingCommands = dcr.Read(_file);
-
-					// Set up the file watcher
-					watcher.Path = _file.Directory.FullName;
-					watcher.Filter = _file.Name;
-				}
-				else
-				{
-					// Clear out the canvas
-					canvas.DrawingCommands = null;
-				}
-			}
-		}
-		
-		/// <summary>
-		/// This event is fired when the file on the drive has
-		/// changed.
-		/// </summary>
-		private void OnFileSystemChanged(object sender, EventArgs args)
-		{
-			OnReload(sender, args);
 		}
 		#endregion
 	}

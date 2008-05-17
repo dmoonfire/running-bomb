@@ -10,7 +10,16 @@ mfgames_runningbomb_FILES =  \
 	MfGames.RunningBomb/Draw/DrawCircle.cs \
 	MfGames.RunningBomb/Draw/IDrawable.cs \
 	MfGames.RunningBomb/Draw/DrawingCommands.cs \
-	MfGames.RunningBomb/Draw/DrawingCommandsReader.cs
+	MfGames.RunningBomb/Draw/DrawingCommandsReader.cs \
+	MfGames.RunningBomb/JunctionNode.cs \
+	MfGames.RunningBomb/IJunctionFactory.cs \
+	MfGames.RunningBomb/RadialJunctionFactory.cs \
+	MfGames.RunningBomb/FactoryManager.cs \
+	MfGames.RunningBomb/ISegmentFactory.cs \
+	MfGames.RunningBomb/SimpleSegmentFactory.cs \
+	MfGames.RunningBomb/Segment.cs \
+	MfGames.RunningBomb/Functions.cs \
+	MfGames.RunningBomb/Constants.cs
 
 gtk_drawer_ASSEMBLY_NAME = gtk-drawer
 gtk_drawer_EXE = $(gtk_drawer_ASSEMBLY_NAME).exe
@@ -20,9 +29,18 @@ gtk_drawer_FILES =  \
 	gtk-drawer/GtkDrawerFrame.cs \
 	gtk-drawer/GtkDrawerCanvas.cs
 
+gtk_tunneler_ASSEMBLY_NAME = gtk-tunneler
+gtk_tunneler_EXE = $(gtk_tunneler_ASSEMBLY_NAME).exe
+gtk_tunneler_ASSEMBLY = $(BUILD)/$(gtk_tunneler_EXE)
+gtk_tunneler_FILES =  \
+	gtk-tunneler/GtkTunnelerEntry.cs \
+	gtk-tunneler/GtkTunnelerFrame.cs \
+	gtk-tunneler/GtkTunnelerCanvas.cs
+
 # Generic
 all: $(mfgames_runningbomb_ASSEMBLY) $(gtk_drawer_ASSEMBLY)
-	cp libs/C5.dll build
+all: $(gtk_tunneler_ASSEMBLY)
+	cp libs/C5.dll libs/Gpc.dll build
 
 clean-local:
 	$(RM) -rf $(BUILD)
@@ -36,6 +54,7 @@ $(mfgames_runningbomb_ASSEMBLY): $(mfgames_runningbomb_FILES) Makefile
 		/d:TRACE /d:DEBUG \
 		@mfgames_utility_LIBS@ \
 		-r:libs/C5.dll \
+		-r:libs/Gpc.dll \
 		-r:System.Drawing \
 		$(realpath $(mfgames_runningbomb_FILES))
 	chmod a-x $@
@@ -47,6 +66,7 @@ $(gtk_drawer_ASSEMBLY): gtk-drawer/ui.xml
 		/d:TRACE /d:DEBUG \
 		@mfgames_utility_LIBS@ \
 		-r:libs/C5.dll \
+		-r:libs/Gpc.dll \
 		-r:System.Drawing \
 		-r:$(mfgames_runningbomb_ASSEMBLY) \
 		-r:/usr/lib/mono/2.0/Mono.Cairo.dll \
@@ -54,6 +74,23 @@ $(gtk_drawer_ASSEMBLY): gtk-drawer/ui.xml
 		-pkg:rsvg-sharp-2.0 \
 		-resource:gtk-drawer/ui.xml \
 		$(realpath $(gtk_drawer_FILES))
+	chmod a+x $@
+
+$(gtk_tunneler_ASSEMBLY): $(gtk_tunneler_FILES) $(mfgames_runningbomb_ASSEMBLY)
+$(gtk_tunneler_ASSEMBLY): gtk-tunneler/ui.xml
+	mkdir -p $(BUILD)
+	$(CSC) -debug $(CSC_FLAGS) -target:winexe -out:$@ \
+		/d:TRACE /d:DEBUG \
+		@mfgames_utility_LIBS@ \
+		-r:libs/C5.dll \
+		-r:libs/Gpc.dll \
+		-r:System.Drawing \
+		-r:$(mfgames_runningbomb_ASSEMBLY) \
+		-r:/usr/lib/mono/2.0/Mono.Cairo.dll \
+		-pkg:gtk-sharp-2.0 \
+		-pkg:rsvg-sharp-2.0 \
+		-resource:gtk-tunneler/ui.xml \
+		$(realpath $(gtk_tunneler_FILES))
 	chmod a+x $@
 
 # Installation

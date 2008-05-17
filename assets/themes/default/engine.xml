@@ -10,12 +10,22 @@
       radius="5"/>
 
   <circle
-      x="2" y="2"
+      x="2.5" y="1.4"
       fill-color="#eebbcc" line-color="#000000"
       radius="2"/>
 
   <circle
-      x="-2" y="0"
+      x="-4" y="0"
+      fill-color="#369782" line-color="none"
+      radius="0.75"/>
+
+  <circle
+      x="-3.5" y="2"
+      fill-color="#369782" line-color="none"
+      radius="0.75"/>
+
+  <circle
+      x="-2" y="3.4"
       fill-color="#369782" line-color="none"
       radius="0.75"/>
 </draw>

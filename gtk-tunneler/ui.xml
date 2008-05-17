@@ -1,0 +1,14 @@
+<ui>
+  <menubar name="MenuBar">
+    <menu action='FileMenu'>
+      <menuitem action='Reload'/>
+      <menuitem action='Rebuild'/>
+      <separator/>
+      <menuitem action='ZoomReset'/>
+      <menuitem action='ZoomIn'/>
+      <menuitem action='ZoomOut'/>
+      <separator/>
+      <menuitem action='Quit'/>
+    </menu>
+  </menubar>
+</ui>
