@@ -111,7 +111,7 @@ namespace MfGames.RunningBomb.GtkTunneler
 				cy = ((float) height / 2) / scale;
 
 				// Draw all the junctions
-				RenderJunction(g, selectedJunctionNode, 1);
+				RenderJunction(g, selectedJunctionNode, PointF.Empty, 1);
 			}
 			finally
 			{
@@ -143,22 +143,83 @@ namespace MfGames.RunningBomb.GtkTunneler
 		/// Renders out a single junction to the canvas.
 		/// </summary>
 		private void RenderJunction(
-			Context g, JunctionNode junction, int recursion)
+			Context g, JunctionNode junction, 
+			PointF point,
+			int recursion)
 		{
 			// Get the shape we need to draw and draw it
-			Poly poly = junction.InternalShape;
+			IPoly poly = junction.InternalShape;
+			RenderPolygon(g, poly, point, new Color(0, 0, 0));
 
-			// Go through the points and draw with a fill
+			// Draw the handle
+			RenderJunctionHandle(g, point);
+
+			// See if we are recursive
+			if (recursion-- > 0)
+			{
+				// Got through the shapes
+				foreach (Segment s in junction.Segments)
+				{
+					// Render the junction
+					RenderJunction(g,
+						s.ChildJunctionNode,
+						s.ChildJunctionNode.Point,
+						recursion);
+				}
+
+				// Got through the shapes
+				foreach (Segment s in junction.Segments)
+				{
+					// Render the segment between the two
+					RenderSegment(g, s);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Draws a little widget in the center to indicate the center of
+		/// the junction.
+		/// </summary>
+		private void RenderJunctionHandle(Context g, PointF point)
+		{
+			// Set up the variables
+			PointF p = new PointF(cx + point.X, cy + point.Y);
+			double s2 = (handleSize / 2) / scale;
+
+			// Show it as a simple square handle
+			g.Color = new Color(1, 1, 1, 0.5);
+			g.MoveTo(p.X - s2, p.Y - s2);
+			g.LineTo(p.X + s2, p.Y - s2);
+			g.LineTo(p.X + s2, p.Y + s2);
+			g.LineTo(p.X - s2, p.Y + s2);
+			g.LineTo(p.X - s2, p.Y - s2);
+			g.Fill();
+			
+			g.Color = new Color(0, 0, 0, 0.5);
+			g.MoveTo(p.X - s2, p.Y - s2);
+			g.LineTo(p.X + s2, p.Y - s2);
+			g.LineTo(p.X + s2, p.Y + s2);
+			g.LineTo(p.X - s2, p.Y + s2);
+			g.LineTo(p.X - s2, p.Y - s2);
+			g.Stroke();
+		}
+
+		/// <summary>
+		/// Renders an arbitrary polygon to the context.
+		/// </summary>
+		private void RenderPolygon(
+			Context g, IPoly poly, PointF point, Color color)
+		{
+			// Save the first point
 			PointF firstPoint = PointF.Empty;
 
-			for (int i = 0; i < poly.GetNumPoints(); i++)
+			// Go through the points of the polygon
+			for (int i = 0; i < poly.PointCount; i++)
 			{
 				// Pull out the coordinates
 				float x = (float) poly.GetX(i);
 				float y = (float) poly.GetY(i);
-				PointF p = new PointF(
-					cx + junction.Point.X - selectedJunctionNode.Point.X + x,
-					cy + junction.Point.Y - selectedJunctionNode.Point.Y + y);
+				PointF p = new PointF(cx + point.X + x, cy + point.Y + y);
 
 				// Either move or line
 				if (firstPoint == PointF.Empty)
@@ -174,62 +235,8 @@ namespace MfGames.RunningBomb.GtkTunneler
 
 			// Finish up
 			g.LineTo(firstPoint.X, firstPoint.Y);
-			g.Color = new Color(0, 0, 0);
+			g.Color = color;
 			g.Fill();
-
-			// Draw the handle
-			RenderJunctionHandle(g, junction);
-
-			// See if we are recursive
-			if (recursion-- > 0)
-			{
-				// Got through the shapes
-				foreach (Segment s in junction.Segments)
-				{
-					// Render the junction
-					RenderJunction(g, s.ChildJunctionNode, recursion);
-
-					// Render the segment between the two
-					RenderSegment(g, s);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Draws a little widget in the center to indicate the center of
-		/// the junction.
-		/// </summary>
-		private void RenderJunctionHandle(Context g, JunctionNode junction)
-		{
-			// Set up the variables
-			PointF p = new PointF(
-				cx + selectedJunctionNode.Point.X + junction.Point.X,
-				cy + selectedJunctionNode.Point.Y + junction.Point.Y);
-			double s2 = (handleSize / 2) / scale;
-
-			// See if we are a parent node or another one
-			if (junction == selectedJunctionNode.ParentJunctionNode)
-			{
-			}
-			else
-			{
-				// Show it as a simple square handle
-				g.Color = new Color(1, 1, 1, 0.5);
-				g.MoveTo(p.X - s2, p.Y - s2);
-				g.LineTo(p.X + s2, p.Y - s2);
-				g.LineTo(p.X + s2, p.Y + s2);
-				g.LineTo(p.X - s2, p.Y + s2);
-				g.LineTo(p.X - s2, p.Y - s2);
-				g.Fill();
-				
-				g.Color = new Color(0, 0, 0, 0.5);
-				g.MoveTo(p.X - s2, p.Y - s2);
-				g.LineTo(p.X + s2, p.Y - s2);
-				g.LineTo(p.X + s2, p.Y + s2);
-				g.LineTo(p.X - s2, p.Y + s2);
-				g.LineTo(p.X - s2, p.Y - s2);
-				g.Stroke();
-			}
 		}
 
 		/// <summary>
@@ -237,28 +244,33 @@ namespace MfGames.RunningBomb.GtkTunneler
 		/// </summary>
 		private void RenderSegment(Context g, Segment segment)
 		{
-			// Start by drawing a line between the points
-			JunctionNode parentNode = segment.ParentJunctionNode;
-			JunctionNode childNode = segment.ChildJunctionNode;
+			// Get the shape we need to draw and draw it
+			IPoly poly = segment.InternalShape;
 
-			g.MoveTo(cx, cy);
-
-			foreach (PointF pf in segment.CenterPoints)
+			if (poly != null)
 			{
-				g.LineTo(
-					cx + pf.X - selectedJunctionNode.Point.X,
-					cy + pf.Y - selectedJunctionNode.Point.Y);
+				// Go through the points and draw with a fill
+				JunctionNode junction = segment.ParentJunctionNode;
+				RenderPolygon(g,
+					poly,
+					junction.Point,
+					new Color(0, 0, 0.5f));
+				
+				double color = 1;
+				
+				for (int i = 0; i < poly.InnerPolygonCount; i++)
+				{
+					RenderPolygon(g,
+						poly.GetInnerPoly(i),
+						junction.Point,
+						new Color(color, 0, 0.5f));
+					color /= 1.5;
+				}
 			}
-
-			// Finish up the line
-			g.Color = new Color(1, 0, 0, 1);
-			g.Stroke();
-
-			// Go through and draw a little circle at each point
-			foreach (PointF pf in segment.CenterPoints)
-			{
-				RenderSegmentHandle(g, pf);
-			}
+				
+			// Draw the center points
+			foreach (PointF point in segment.CenterPoints)
+				RenderSegmentHandle(g, point);
 		}
 
 		/// <summary>
@@ -268,12 +280,11 @@ namespace MfGames.RunningBomb.GtkTunneler
 		private void RenderSegmentHandle(Context g, PointF segmentPoint)
 		{
 			// Set up the variables
-			PointF p = new PointF(
-				cx + selectedJunctionNode.Point.X + segmentPoint.X,
-				cy + selectedJunctionNode.Point.Y + segmentPoint.Y);
+			PointF p = new PointF(cx + segmentPoint.X, cy + segmentPoint.Y);
 			double s2 = (handleSize / 2) / scale;
 
 			// Draw a red circle
+			g.Color = new Color(0, 0, 0.75f);
 			g.Arc(p.X, p.Y, s2, 0, Math.PI * 2);
 			g.Fill();
 		}

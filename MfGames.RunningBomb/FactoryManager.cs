@@ -16,7 +16,7 @@ namespace MfGames.RunningBomb
 		public static IJunctionFactory ChooseJunctionFactory(
 			MersenneRandom random)
 		{
-			return new RadialJunctionFactory();
+			return new SimpleJunctionFactory();
 		}
 		#endregion
 

@@ -45,6 +45,9 @@ PKG_CHECK_MODULES(mfgames_utility, mfgames-utility-3.0)
 
 dnl BooGame
 
+dnl Gpc
+PKG_CHECK_MODULES(gpc, gpc-sharp-0.0)
+
 dnl Tao Framework
 PKG_CHECK_MODULES(tao_opengl, tao-opengl-2.1)
 PKG_CHECK_MODULES(tao_sdl, tao-sdl-1.2)

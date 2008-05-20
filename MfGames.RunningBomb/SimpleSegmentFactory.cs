@@ -1,6 +1,10 @@
 using C5;
+using Gpc;
 using MfGames.Utility;
 using System;
+#if DEBUG
+using System.Diagnostics;
+#endif
 using System.Drawing;
 
 namespace MfGames.RunningBomb
@@ -26,105 +30,107 @@ namespace MfGames.RunningBomb
 			JunctionNode parentNode = childNode.ParentJunctionNode;
 
 			float distance = (float) Math.Sqrt(
-				Math.Pow(parentNode.Point.X - childNode.Point.X, 2) +
-				Math.Pow(parentNode.Point.Y - childNode.Point.Y, 2));
-
-			// Figure out how many nodes we should have. Roughly, we
-			// want about one every 100 meters. We also want this to
-			// be a power of two.
-			int nodeCount = Functions.NextPowerOfTwo((int) (distance / 100.0));
+				Math.Pow(childNode.Point.X, 2) +
+				Math.Pow(childNode.Point.Y, 2));
 
 			// Add the two end points
 			LinkedList<PointF> points = new LinkedList<PointF>();
-			LinkedList<PointF> newPoints = new LinkedList<PointF>();
-			points.Add(parentNode.Point);
+			points.Add(new PointF(0, 0));
 			points.Add(childNode.Point);
 
 			// Split apart the line
-			int recursion = 3;
+#if DEBUG
+			Stopwatch stopwatch = Stopwatch.StartNew();
+#endif
 
-			while (nodeCount > 0)
+			// Stagger (fractalize) the points
+			Geometry.StaggerPoints(points, parentNode.Random,
+				Constants.MinimumSegmentDistance,
+				Constants.StaggerSegmentPasses);
+
+#if DEBUG
+			// Show timing information
+			stopwatch.Stop();
+			Log.Debug("Fractal Time: {0}", stopwatch.Elapsed);
+			stopwatch.Reset();
+			stopwatch.Start();
+#endif
+
+			// Once we generated a set of center points, we go through
+			// and add a randomly-sized and angled square to each
+			// point, unioning the results to get the shape of the
+			// entire segment.
+			IPoly shape = null;
+
+			foreach (PointF point in points)
 			{
-				// Loop through the points
-				for (int i = 0; i < points.Count -1; i++)
+				// Keep track of our retries
+				int retry = 1;
+
+				while (true)
 				{
-					// Pull the two points
-					PointF p1 = points[i];
-					PointF p2 = points[i + 1];
+					// Create a shape
+					IPoly p = Geometry.CreateShape(parentNode, point,
+						retry * Constants.SegmentAverageWidth);
 
-					// Create a point between these two
-					newPoints.Add(p1);
-					newPoints.Add(SegmentPoints(p1, p2,
-							parentNode.Random,
-							distance, recursion));
-					newPoints.Add(p2);
+					// If we have no shape, this is automatically
+					// included.
+					if (shape == null)
+					{
+						shape = p;
+						break;
+					}
+					
+					// We have another shape, so we want to build up
+					// an intersection to make sure they are touching.
+					IPoly intersect = shape.Intersection(p);
+					
+					if (intersect.PointCount == 0)
+					{
+						// If there is no intersection, then we need
+						// to try again and make the radius range larger.
+						retry++;
+						continue;
+					}
+
+					// Make a union of the two shapes
+					IPoly union = shape.Union(p);
+
+					// See if we have two shapes
+					if (union.InnerPolygonCount > 1)
+					{
+						// We didn't quite reach each other
+						retry++;
+						continue;
+					}
+
+					// Set the new shape
+					shape = union;
+					break;
 				}
-
-				// Copy the points
-				points.Clear();
-				points.AddAll(newPoints);
-				newPoints.Clear();
-
-				// Since we double the number of lines, just halve
-				// the node count.
-				nodeCount /= 2;
-				recursion++;
 			}
 
-			// Add the points to the segment
+			// Remove both junction shapes from this
+			//shape = shape.Difference(parentNode.InternalShape);
+			//shape = shape.Difference(childNode.InternalShape);
+
+#if DEBUG
+			// Show timing information
+			stopwatch.Stop();
+			Log.Debug("Polygon Time: {0}", stopwatch.Elapsed);
+			Log.Debug("Polygon Area: {0}", shape.GetArea());
+			Log.Debug("Polygon Coun: {0}", shape.PointCount);
+			Log.Debug("Polygon Innr: {0}", shape.InnerPolygonCount);
+#endif
+
+			// Add the shape to the list
+			segment.InternalShape = shape;
 			segment.CenterPoints.AddAll(points);
 
 			// Return the results
 			return segment;
 		}
-
-		/// <summary>
-		/// Creates a mid-point between the two points and modifies to
-		/// give it a jagged appearance.
-		/// </summary>
-		private PointF SegmentPoints(
-			PointF p1, PointF p2,
-			MersenneRandom random,
-			float distance, int recursion)
-		{
-			// Get the midpoint
-			PointF mp = new PointF(
-				(p1.X + p2.X) / 2,
-				(p1.Y + p2.Y) / 2);
-
-			// Change this point by a small, random amount
-			float maxDiff = distance / (float) (recursion * recursion);
-			float diff = random.NextSingle(-maxDiff, maxDiff);
-
-			// Calculate a perpendicular line
-			float dy = p2.Y - p1.Y;
-			float dx = p2.X - p1.X;
-
-			if (dy == 0)
-			{
-				// This is a horizontal line
-				//mp.X += diff;
-			}
-			else if (dx == 0)
-			{
-				// This is a vertical line
-				//mp.Y += diff;
-			}
-			else
-			{
-				// Figure out the slope of the line
-				double theta1 = Math.Tanh(dy / dx);
-				double theta2 = theta1 - Math.PI / 2;
-
-				mp = new PointF(
-					(float) (mp.X + diff * Math.Cos(theta2)),
-					(float) (mp.Y + diff * Math.Sin(theta2)));
-			}
-
-			// Return the results
-			return mp;
-		}
-
+		
 		#region Logging
 		private Log log;
 

@@ -1,4 +1,5 @@
 using C5;
+using Gpc;
 using System;
 using System.Drawing;
 
@@ -45,6 +46,7 @@ namespace MfGames.RunningBomb
 		#endregion
 
 		#region Nodes
+		private IPoly internalShape;
 		private LinkedList<PointF> centerPoints =
 			new LinkedList<PointF>();
 
@@ -54,6 +56,15 @@ namespace MfGames.RunningBomb
 		public IList<PointF> CenterPoints
 		{
 			get { return centerPoints; }
+		}
+
+		/// <summary>
+		/// Contains the internal shape to this segment.
+		/// </summary>
+		public IPoly InternalShape
+		{
+			get { return internalShape; }
+			set { internalShape = value; }
 		}
 		#endregion
 	}

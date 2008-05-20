@@ -23,7 +23,6 @@ namespace MfGames.RunningBomb
 			// radials, which is determined by the random number generator.
 			int radialCount = junction.Random.Next(8, 32);
 			LinkedList<PointF> internalPoints = new LinkedList<PointF>();
-			LinkedList<PointF> externalPoints = new LinkedList<PointF>();
 
 			// Populate the radial points
 			for (int i = 0; i < radialCount; i++)
@@ -39,14 +38,6 @@ namespace MfGames.RunningBomb
 				float py = (float) Math.Sin(angle) * length;
 				
 				internalPoints.Add(new PointF(px, py));
-
-				// Add a short distance to the radial and add it as an
-				// external limit.
-				length *= 1.2f;
-				px = junction.Point.X + (float) Math.Cos(angle) * length;
-				py = junction.Point.Y + (float) Math.Sin(angle) * length;
-				
-				externalPoints.Add(new PointF(px, py));
 			}
 
 			// TODO: Do some fractal generation
@@ -56,19 +47,16 @@ namespace MfGames.RunningBomb
 			// Create a polygon from the two results. The external
 			// then has the internal taken out of the middle to
 			// represent the "hollow" space of the polygon.
-			Poly internalPolygon = CreatePolygon(internalPoints);
-			Poly externalPolygon = CreatePolygon(externalPoints);
-
-			externalPolygon = externalPolygon.Xor(internalPolygon);
+			IPoly internalPolygon = CreatePolygon(internalPoints);
 
 			// Set the polygons in the junction
-			junction.SetShapes(internalPolygon, externalPolygon);
+			junction.InternalShape = internalPolygon;
 		}
 
 		/// <summary>
 		/// Creates a polygon from the given list of points.
 		/// </summary>
-		private Poly CreatePolygon(IList<PointF> points)
+		private IPoly CreatePolygon(IList<PointF> points)
 		{
 			// Create the polygon
 			PolyDefault pd = new PolyDefault();

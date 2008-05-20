@@ -67,7 +67,6 @@ namespace MfGames.RunningBomb
 
 			// Purge the stored data
 			internalShape = null;
-			externalShape = null;
 			segments.Clear();
 
 			// Reset the random value
@@ -77,26 +76,21 @@ namespace MfGames.RunningBomb
 
 		#region Geometry
 		private bool builtShape = false;
-		private Poly internalShape, externalShape;
-
-		/// <summary>
-		/// This is a polygon that describes the outside of the
-		/// junction, bounded by the walls. It is used by the physics
-		/// layer to determine boundaries.
-		/// </summary>
-		public Poly ExternalShape
-		{
-			get { BuildShapes(); return externalShape; }
-		}
+		private IPoly internalShape;
 
 		/// <summary>
 		/// This is the poly that is used to describe the internal
 		/// shape of the junction, where the shape and elements can
 		/// safely go.
 		/// </summary>
-		public Poly InternalShape
+		public IPoly InternalShape
 		{
 			get { BuildShapes(); return internalShape; }
+			set
+			{
+				internalShape = value;
+				builtShape = true;
+			}
 		}
 
 		/// <summary>
@@ -119,17 +113,6 @@ namespace MfGames.RunningBomb
 			// Get the factory
 			IJunctionFactory ijf = FactoryManager.ChooseJunctionFactory(random);
 			ijf.Create(this);
-		}
-
-		/// <summary>
-		/// Sets the shapes of this junction with a given set of
-		/// polygons.
-		/// </summary>
-		public void SetShapes(Poly internalPolygon, Poly externalPolygon)
-		{
-			internalShape = internalPolygon;
-			externalShape = externalPolygon;
-			builtShape = true;
 		}
 		#endregion
 
@@ -177,9 +160,11 @@ namespace MfGames.RunningBomb
 				float length = Random.NextSingle(
 					Constants.MinimumConnectionDistance,
 					Constants.MaximumConnectionDistance);
+
+				// Junction points are relative to the parent node
 				PointF point = new PointF(
-					Point.X + (float) Math.Cos(angle) * length,
-					Point.Y + (float) Math.Sin(angle) * length);
+					(float) Math.Cos(angle) * length,
+					(float) Math.Sin(angle) * length);
 
 				// Create a new junction at this point
 				JunctionNode junction = new JunctionNode(Random.Next());

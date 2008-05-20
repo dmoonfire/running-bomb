@@ -14,6 +14,8 @@ mfgames_runningbomb_FILES =  \
 	MfGames.RunningBomb/JunctionNode.cs \
 	MfGames.RunningBomb/IJunctionFactory.cs \
 	MfGames.RunningBomb/RadialJunctionFactory.cs \
+	MfGames.RunningBomb/SimpleJunctionFactory.cs \
+	MfGames.RunningBomb/Geometry.cs \
 	MfGames.RunningBomb/FactoryManager.cs \
 	MfGames.RunningBomb/ISegmentFactory.cs \
 	MfGames.RunningBomb/SimpleSegmentFactory.cs \
@@ -40,7 +42,7 @@ gtk_tunneler_FILES =  \
 # Generic
 all: $(mfgames_runningbomb_ASSEMBLY) $(gtk_drawer_ASSEMBLY)
 all: $(gtk_tunneler_ASSEMBLY)
-	cp libs/C5.dll libs/Gpc.dll build
+	cp libs/C5.dll build
 
 clean-local:
 	$(RM) -rf $(BUILD)
@@ -54,7 +56,7 @@ $(mfgames_runningbomb_ASSEMBLY): $(mfgames_runningbomb_FILES) Makefile
 		/d:TRACE /d:DEBUG \
 		@mfgames_utility_LIBS@ \
 		-r:libs/C5.dll \
-		-r:libs/Gpc.dll \
+		@gpc_LIBS@ \
 		-r:System.Drawing \
 		$(realpath $(mfgames_runningbomb_FILES))
 	chmod a-x $@
@@ -66,7 +68,7 @@ $(gtk_drawer_ASSEMBLY): gtk-drawer/ui.xml
 		/d:TRACE /d:DEBUG \
 		@mfgames_utility_LIBS@ \
 		-r:libs/C5.dll \
-		-r:libs/Gpc.dll \
+		@gpc_LIBS@ \
 		-r:System.Drawing \
 		-r:$(mfgames_runningbomb_ASSEMBLY) \
 		-r:/usr/lib/mono/2.0/Mono.Cairo.dll \
@@ -83,7 +85,7 @@ $(gtk_tunneler_ASSEMBLY): gtk-tunneler/ui.xml
 		/d:TRACE /d:DEBUG \
 		@mfgames_utility_LIBS@ \
 		-r:libs/C5.dll \
-		-r:libs/Gpc.dll \
+		@gpc_LIBS@ \
 		-r:System.Drawing \
 		-r:$(mfgames_runningbomb_ASSEMBLY) \
 		-r:/usr/lib/mono/2.0/Mono.Cairo.dll \
