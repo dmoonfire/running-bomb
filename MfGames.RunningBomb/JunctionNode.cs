@@ -150,7 +150,30 @@ namespace MfGames.RunningBomb
 			// Keep track of the overlap detection code
 			LinkedList<IPoly> overlaps = new LinkedList<IPoly>();
 
-			// TODO: Special rules with the connection leading in
+			// Process the parent element
+			if (ParentJunctionNode != null)
+			{
+				// Find our input segment
+				Segment ps = ParentJunctionNode.GetSegment(this);
+
+				if (ps == null)
+					throw new Exception("We got a null segment from parent");
+
+				// Add the parent segment with swapped directions
+				ps = ps.Swap();
+				segments.Add(ps);
+
+				// Add both the parent junction and the segment to the
+				// overlap test to prevent overlapping.
+				JunctionNode pj = ps.ChildJunctionNode;
+				IPoly circleTest = Geometry.CreateCircle(
+					pj.Point,
+					Constants.OverlapConnectionDistance);
+				IPoly overlapTest = pj.InternalShape
+					.Union(ps.InternalShape);
+				overlapTest = overlapTest.Intersection(circleTest);
+				overlaps.Add(overlapTest);
+			}
 
 			// We want to create a random number of connections
 			int connectionCount = Random.Next(
@@ -198,22 +221,7 @@ namespace MfGames.RunningBomb
 					junction.Point, Constants.OverlapConnectionDistance);
 				IPoly overlapTest = junction.InternalShape
 					.Union(segment.InternalShape);
-
-				if (overlapTest.InnerPolygonCount > 1)
-				{
-					// GPC quirk doesn't allow this, so we reject it
-					Log.Debug("Rejection because too many parts");
-					continue;
-				}
-
 				overlapTest = overlapTest.Intersection(circleTest);
-
-				if (overlapTest.InnerPolygonCount > 1)
-				{
-					// GPC quirk doesn't allow this, so we reject it
-					Log.Debug("Rejection because circle has too many parts");
-					continue;
-				}
 
 				// If we have an overlap, we'll have too much
 				// difficulty figuring out where the player is going,
@@ -233,6 +241,18 @@ namespace MfGames.RunningBomb
 
 			// We are done
 			builtConnections = true;
+		}
+
+		/// <summary>
+		/// Retrieves a segment based on the child junction.
+		/// </summary>
+		public Segment GetSegment(JunctionNode junction)
+		{
+			foreach (Segment s in segments)
+				if (s.ChildJunctionNode == junction)
+					return s;
+
+			return null;
 		}
 
 		/// <summary>

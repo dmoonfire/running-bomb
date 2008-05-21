@@ -1,5 +1,6 @@
 using C5;
 using Gpc;
+using MfGames.Utility;
 using System;
 using System.Drawing;
 
@@ -13,6 +14,7 @@ namespace MfGames.RunningBomb
 	{
 		#region Junctions
 		private JunctionNode parent, child;
+		private bool swapped;
 
 		/// <summary>
 		/// Sets the child junction node for this segment.
@@ -43,6 +45,14 @@ namespace MfGames.RunningBomb
 				parent = value;
 			}
 		}
+
+		/// <summary>
+		/// Returns true if this is a swapped or reversed segment.
+		/// </summary>
+		public bool IsSwapped
+		{
+			get { return swapped; }
+		}
 		#endregion
 
 		#region Nodes
@@ -65,6 +75,65 @@ namespace MfGames.RunningBomb
 		{
 			get { return internalShape; }
 			set { internalShape = value; }
+		}
+		#endregion
+
+		#region Swapping
+		/// <summary>
+		/// Creates a new segment with the ends swapped and the
+		/// polygons reversed.
+		/// </summary>
+		public Segment Swap()
+		{
+			// Create a new segment
+			Segment s = new Segment();
+			s.swapped = !swapped;
+			s.child = parent;
+			s.parent = child;
+
+			// Reverse the polygon of the segment
+			double dx = -child.Point.X;
+			double dy = -child.Point.Y;
+			PolyDefault ps = new PolyDefault();
+			int count = internalShape.PointCount;
+
+			for (int i = 0; i < count; i++)
+			{
+				double x = dx + internalShape.GetX(i);
+				double y = dy + internalShape.GetY(i);
+
+				ps.Add(x, y);
+			}
+
+			s.internalShape = ps;
+
+			// Reverse the center lines
+			foreach (PointF pf in centerPoints)
+			{
+				s.centerPoints.Add(
+					new PointF((float) dx + pf.X, (float) dy + pf.Y));
+			}
+
+			// Return the results
+			return s;
+		}
+		#endregion
+
+		#region Logging
+		private Log log;
+
+		/// <summary>
+		/// Contains the logging interface which is lazily-loaded.
+		/// </summary>
+		public Log Log
+		{
+			get
+			{
+				if (log == null)
+					log = new Log(GetType());
+
+				return log;
+			}
 		}
 		#endregion
 	}

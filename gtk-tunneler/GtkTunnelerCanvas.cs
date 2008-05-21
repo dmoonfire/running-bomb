@@ -168,10 +168,22 @@ namespace MfGames.RunningBomb.GtkTunneler
 				foreach (Segment s in junction.Segments)
 				{
 					// Render the junction
-					RenderJunction(g,
-						s.ChildJunctionNode,
-						s.ChildJunctionNode.Point,
-						recursion);
+					if (s.IsSwapped)
+					{
+						RenderJunction(g,
+							s.ChildJunctionNode,
+							new PointF(
+								s.ChildJunctionNode.Point.X - junction.Point.X,
+								s.ChildJunctionNode.Point.Y - junction.Point.Y),
+							recursion);
+					}
+					else
+					{
+						RenderJunction(g,
+							s.ChildJunctionNode,
+							s.ChildJunctionNode.Point,
+							recursion);
+					}
 				}
 
 				// Got through the shapes
@@ -181,13 +193,27 @@ namespace MfGames.RunningBomb.GtkTunneler
 					RenderSegment(g, s);
 
 					// Render and save the junction handles
-					RenderJunctionHandle(
-						g,
-						s.ChildJunctionNode.Point,
-						s.ChildJunctionNode == hoverJunctionNode);
+					if (s.IsSwapped)
+					{
+						RenderJunctionHandle(
+							g,
+							new PointF(
+								s.ChildJunctionNode.Point.X - junction.Point.X,
+								s.ChildJunctionNode.Point.Y - junction.Point.Y),
+							s.IsSwapped,
+							s.ChildJunctionNode == hoverJunctionNode);
+					}
+					else
+					{
+						RenderJunctionHandle(
+							g,
+							s.ChildJunctionNode.Point,
+							s.IsSwapped,
+							s.ChildJunctionNode == hoverJunctionNode);
+					}
 
 					// Save the point
-					junctionHandles.Add(s.ChildJunctionNode);
+					junctionHandles.Add(s);
 				}
 			}
 		}
@@ -196,7 +222,8 @@ namespace MfGames.RunningBomb.GtkTunneler
 		/// Draws a little widget in the center to indicate the center of
 		/// the junction.
 		/// </summary>
-		private void RenderJunctionHandle(Context g, PointF point, bool hover)
+		private void RenderJunctionHandle(Context g, PointF point,
+			bool swapped, bool hover)
 		{
 			// Set up the variables
 			PointF p = new PointF(cx + point.X, cy + point.Y);
@@ -208,11 +235,19 @@ namespace MfGames.RunningBomb.GtkTunneler
 			else
 				g.Color = new Color(1, 1, 1, 0.5);
 
-			g.MoveTo(p.X - s2, p.Y - s2);
-			g.LineTo(p.X + s2, p.Y - s2);
-			g.LineTo(p.X + s2, p.Y + s2);
-			g.LineTo(p.X - s2, p.Y + s2);
-			g.LineTo(p.X - s2, p.Y - s2);
+			if (swapped)
+			{
+				g.Arc(p.X, p.Y, s2, 0, Math.PI * 2);
+			}
+			else
+			{
+				g.MoveTo(p.X - s2, p.Y - s2);
+				g.LineTo(p.X + s2, p.Y - s2);
+				g.LineTo(p.X + s2, p.Y + s2);
+				g.LineTo(p.X - s2, p.Y + s2);
+				g.LineTo(p.X - s2, p.Y - s2);
+			}
+
 			g.Fill();
 			
 			if (hover)
@@ -220,11 +255,19 @@ namespace MfGames.RunningBomb.GtkTunneler
 			else
 				g.Color = new Color(0, 0, 0, 0.5);
 
-			g.MoveTo(p.X - s2, p.Y - s2);
-			g.LineTo(p.X + s2, p.Y - s2);
-			g.LineTo(p.X + s2, p.Y + s2);
-			g.LineTo(p.X - s2, p.Y + s2);
-			g.LineTo(p.X - s2, p.Y - s2);
+			if (swapped)
+			{
+				g.Arc(p.X, p.Y, s2, 0, Math.PI * 2);
+			}
+			else
+			{
+				g.MoveTo(p.X - s2, p.Y - s2);
+				g.LineTo(p.X + s2, p.Y - s2);
+				g.LineTo(p.X + s2, p.Y + s2);
+				g.LineTo(p.X - s2, p.Y + s2);
+				g.LineTo(p.X - s2, p.Y - s2);
+			}
+
 			g.Stroke();
 		}
 
@@ -274,7 +317,6 @@ namespace MfGames.RunningBomb.GtkTunneler
 			if (poly != null)
 			{
 				// Go through the points and draw with a fill
-				JunctionNode junction = segment.ParentJunctionNode;
 				RenderPolygon(g,
 					poly,
 					PointF.Empty,
@@ -315,8 +357,8 @@ namespace MfGames.RunningBomb.GtkTunneler
 		#endregion
 		
 		#region Mouse Movement
-		private LinkedList<JunctionNode> junctionHandles =
-			new LinkedList<JunctionNode>();
+		private LinkedList<Segment> junctionHandles =
+			new LinkedList<Segment>();
 		private JunctionNode hoverJunctionNode;
 
 		/// <summary>
@@ -361,10 +403,24 @@ namespace MfGames.RunningBomb.GtkTunneler
 			// Go through the list and see if we are near a handle
 			hoverJunctionNode = null;
 
-			foreach (JunctionNode jn in junctionHandles)
+			foreach (Segment s in junctionHandles)
 			{
-				if (jn.Point.X - hs <= x && x <= jn.Point.X + hs &&
-					jn.Point.Y - hs <= y && y <= jn.Point.Y + hs)
+				// Get the point, swapping it if needed
+				JunctionNode jn = s.ChildJunctionNode;
+				PointF p = jn.Point;
+
+				if (s.IsSwapped)
+				{
+					JunctionNode junction = s.ParentJunctionNode;
+
+					p = new PointF(
+						s.ChildJunctionNode.Point.X - junction.Point.X,
+						s.ChildJunctionNode.Point.Y - junction.Point.Y);
+				}
+
+				// See if we are in range
+				if (p.X - hs <= x && x <= p.X + hs &&
+					p.Y - hs <= y && y <= p.Y + hs)
 				{
 					hoverJunctionNode = jn;
 					break;

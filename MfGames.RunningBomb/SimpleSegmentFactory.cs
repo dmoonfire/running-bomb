@@ -29,10 +29,6 @@ namespace MfGames.RunningBomb
 			Segment segment = new Segment();
 			JunctionNode parentNode = childNode.ParentJunctionNode;
 
-			float distance = (float) Math.Sqrt(
-				Math.Pow(childNode.Point.X, 2) +
-				Math.Pow(childNode.Point.Y, 2));
-
 			// Add the two end points
 			LinkedList<PointF> points = new LinkedList<PointF>();
 			points.Add(new PointF(0, 0));
