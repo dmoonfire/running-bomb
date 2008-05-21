@@ -147,6 +147,11 @@ namespace MfGames.RunningBomb
 			// Make sure our shapes are built to keep the order consistent
 			BuildShapes();
 
+			// Keep track of the overlap detection code
+			LinkedList<IPoly> overlaps = new LinkedList<IPoly>();
+
+			// TODO: Special rules with the connection leading in
+
 			// We want to create a random number of connections
 			int connectionCount = Random.Next(
 				Constants.BuildMinimumConnections,
@@ -172,6 +177,14 @@ namespace MfGames.RunningBomb
 				junction.Point = point;
 				junction.BuildShapes();
 
+				// Start the overlap testing with just the junction to
+				// short-circuit it faster if there is an overlap.
+				if (HasIntersection(overlaps, junction.InternalShape))
+				{
+					Log.Debug("Rejected because junctions overlap");
+					continue;
+				}
+
 				// Get the segment factory
 				ISegmentFactory isf =
 					FactoryManager.ChooseSegmentFactory(junction);
@@ -179,7 +192,40 @@ namespace MfGames.RunningBomb
 				segment.ParentJunctionNode = this;
 				segment.ChildJunctionNode = junction;
 
-				// TODO: Make sure there is no overlap
+				// Test to see if there is an overlap with the current
+				// segments and junctions.
+				IPoly circleTest = Geometry.CreateCircle(
+					junction.Point, Constants.OverlapConnectionDistance);
+				IPoly overlapTest = junction.InternalShape
+					.Union(segment.InternalShape);
+
+				if (overlapTest.InnerPolygonCount > 1)
+				{
+					// GPC quirk doesn't allow this, so we reject it
+					Log.Debug("Rejection because too many parts");
+					continue;
+				}
+
+				overlapTest = overlapTest.Intersection(circleTest);
+
+				if (overlapTest.InnerPolygonCount > 1)
+				{
+					// GPC quirk doesn't allow this, so we reject it
+					Log.Debug("Rejection because circle has too many parts");
+					continue;
+				}
+
+				// If we have an overlap, we'll have too much
+				// difficulty figuring out where the player is going,
+				// so reject it.
+				if (HasIntersection(overlaps, segment.InternalShape))
+				{
+					Log.Debug("Rejection because segments overlap");
+					continue;
+				}
+
+				// We don't overlap, so add it to the test
+				overlaps.Add(overlapTest);
 
 				// Add it to the segments
 				segments.Add(segment);
@@ -187,6 +233,39 @@ namespace MfGames.RunningBomb
 
 			// We are done
 			builtConnections = true;
+		}
+
+		/// <summary>
+		/// Returns true if the shape intersects any of the shapes in
+		/// the list.
+		/// </summary>
+		private bool HasIntersection(IList<IPoly> overlaps, IPoly shape)
+		{
+			// Go through the list
+			foreach (IPoly ip in overlaps)
+				if (shape.HasIntersection(ip))
+					return true;
+
+			// No intersections
+			return false;
+		}
+		#endregion
+
+		#region Logging
+		private Log log;
+
+		/// <summary>
+		/// Contains the logging interface which is lazily-loaded.
+		/// </summary>
+		public Log Log
+		{
+			get
+			{
+				if (log == null)
+					log = new Log(GetType());
+
+				return log;
+			}
 		}
 		#endregion
 	}

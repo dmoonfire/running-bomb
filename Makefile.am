@@ -21,6 +21,7 @@ mfgames_runningbomb_FILES =  \
 	MfGames.RunningBomb/SimpleSegmentFactory.cs \
 	MfGames.RunningBomb/Segment.cs \
 	MfGames.RunningBomb/Functions.cs \
+	MfGames.RunningBomb/Score.cs \
 	MfGames.RunningBomb/Constants.cs
 
 gtk_drawer_ASSEMBLY_NAME = gtk-drawer

@@ -17,6 +17,12 @@ namespace MfGames.RunningBomb
 		/// </summary>
 		public const float MaximumConnectionDistance = 7500;
 
+		/// <summary>
+		/// This is the distance, in meters, from a child junction to
+		/// test for overlap.
+		/// </summary>
+		public const float OverlapConnectionDistance = 1500;
+
 		public const float PI = (float) Math.PI;
 		public const float PI2 = (float) Math.PI * 2f;
 
@@ -45,5 +51,24 @@ namespace MfGames.RunningBomb
 		/// The average width, in meters, of a junction node.
 		/// </summary>
 		public const int JunctionAverageWidth = 300;
+
+		#region World Settings
+		/// <summary>
+		/// Sets the starting population to one trillion and one
+		/// people.
+		/// </summary>
+		public const long StartingPopulation = 1000000000001;
+
+		/// <summary>
+		/// The safe distance is one million meters.
+		/// </summary>
+		public const double BombSafeDistance = 1000000;
+
+		/// <summary>
+		/// The distance where the player is safe is double the bomb
+		/// safe distance.
+		/// </summary>
+		public const double PlayerSafeDistance = 2 * BombSafeDistance;
+		#endregion
 	}
 }

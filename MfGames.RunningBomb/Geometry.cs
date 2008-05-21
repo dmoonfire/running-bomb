@@ -25,6 +25,33 @@ namespace MfGames.RunningBomb
 
 		#region Shapes Generation
 		/// <summary>
+		/// Creates a standard circle with some point that
+		/// approximates a circle.
+		/// </summary>
+		public static IPoly CreateCircle(
+			PointF point,
+			float radius)
+		{
+			// Create the polygon
+			PolyDefault poly = new PolyDefault();
+
+			// Create the points by just going in a circle
+			int points = 32;
+			double angle = 0;
+
+			for (int i = 0; i < points; i++)
+			{
+				poly.Add(new PointF(
+						point.X + (float) Math.Cos(angle) * radius,
+						point.Y + (float) Math.Sin(angle) * radius));
+				angle += Constants.PI2 / points;
+			}
+
+			// Return the results
+			return poly;
+		}
+
+		/// <summary>
 		/// Creates a polygon-based shape around a single point of a
 		/// random size. The radiusMultiplier is used to increase the
 		/// size to ensure that it connects to another shape (if that

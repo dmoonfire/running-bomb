@@ -83,9 +83,7 @@ namespace MfGames.RunningBomb
 					
 					// We have another shape, so we want to build up
 					// an intersection to make sure they are touching.
-					IPoly intersect = shape.Intersection(p);
-					
-					if (intersect.PointCount == 0)
+					if (!shape.HasIntersection(p))
 					{
 						// If there is no intersection, then we need
 						// to try again and make the radius range larger.

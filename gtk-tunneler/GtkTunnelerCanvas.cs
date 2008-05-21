@@ -26,13 +26,21 @@ namespace MfGames.RunningBomb.GtkTunneler
 		{
 			// Connect the events
 			Events |=
-				Gdk.EventMask.VisibilityNotifyMask;
+				Gdk.EventMask.Button1MotionMask |
+				Gdk.EventMask.Button2MotionMask |
+				Gdk.EventMask.ButtonPressMask |
+				Gdk.EventMask.ButtonReleaseMask |
+				Gdk.EventMask.VisibilityNotifyMask |
+				Gdk.EventMask.PointerMotionMask |
+				Gdk.EventMask.PointerMotionHintMask;
 			ExposeEvent += OnExpose;
 			ConfigureEvent += OnConfigure;
+			ButtonReleaseEvent += OnButtonRelease;
+			MotionNotifyEvent += OnMotionNotify;
 
 			// Create the root node with a random seed
 			rootJunctionNode = new JunctionNode();
-			selectedJunctionNode = new JunctionNode();
+			selectedJunctionNode = rootJunctionNode;
 		}
 		#endregion
 
@@ -111,6 +119,7 @@ namespace MfGames.RunningBomb.GtkTunneler
 				cy = ((float) height / 2) / scale;
 
 				// Draw all the junctions
+				junctionHandles.Clear();
 				RenderJunction(g, selectedJunctionNode, PointF.Empty, 1);
 			}
 			finally
@@ -135,6 +144,7 @@ namespace MfGames.RunningBomb.GtkTunneler
 		/// </summary>
 		public void Reload()
 		{
+			selectedJunctionNode = rootJunctionNode;
 			rootJunctionNode.Reset();
 			QueueDraw();
 		}
@@ -150,9 +160,6 @@ namespace MfGames.RunningBomb.GtkTunneler
 			// Get the shape we need to draw and draw it
 			IPoly poly = junction.InternalShape;
 			RenderPolygon(g, poly, point, new Color(0, 0, 0));
-
-			// Draw the handle
-			RenderJunctionHandle(g, point);
 
 			// See if we are recursive
 			if (recursion-- > 0)
@@ -172,6 +179,15 @@ namespace MfGames.RunningBomb.GtkTunneler
 				{
 					// Render the segment between the two
 					RenderSegment(g, s);
+
+					// Render and save the junction handles
+					RenderJunctionHandle(
+						g,
+						s.ChildJunctionNode.Point,
+						s.ChildJunctionNode == hoverJunctionNode);
+
+					// Save the point
+					junctionHandles.Add(s.ChildJunctionNode);
 				}
 			}
 		}
@@ -180,14 +196,18 @@ namespace MfGames.RunningBomb.GtkTunneler
 		/// Draws a little widget in the center to indicate the center of
 		/// the junction.
 		/// </summary>
-		private void RenderJunctionHandle(Context g, PointF point)
+		private void RenderJunctionHandle(Context g, PointF point, bool hover)
 		{
 			// Set up the variables
 			PointF p = new PointF(cx + point.X, cy + point.Y);
-			double s2 = (handleSize / 2) / scale;
+			double s2 = (handleSize) / scale;
 
 			// Show it as a simple square handle
-			g.Color = new Color(1, 1, 1, 0.5);
+			if (hover)
+				g.Color = new Color(1, 0, 0);
+			else
+				g.Color = new Color(1, 1, 1, 0.5);
+
 			g.MoveTo(p.X - s2, p.Y - s2);
 			g.LineTo(p.X + s2, p.Y - s2);
 			g.LineTo(p.X + s2, p.Y + s2);
@@ -195,7 +215,11 @@ namespace MfGames.RunningBomb.GtkTunneler
 			g.LineTo(p.X - s2, p.Y - s2);
 			g.Fill();
 			
-			g.Color = new Color(0, 0, 0, 0.5);
+			if (hover)
+				g.Color = new Color(1, 1, 1);
+			else
+				g.Color = new Color(0, 0, 0, 0.5);
+
 			g.MoveTo(p.X - s2, p.Y - s2);
 			g.LineTo(p.X + s2, p.Y - s2);
 			g.LineTo(p.X + s2, p.Y + s2);
@@ -253,16 +277,16 @@ namespace MfGames.RunningBomb.GtkTunneler
 				JunctionNode junction = segment.ParentJunctionNode;
 				RenderPolygon(g,
 					poly,
-					junction.Point,
+					PointF.Empty,
 					new Color(0, 0, 0.5f));
 				
 				double color = 1;
 				
-				for (int i = 0; i < poly.InnerPolygonCount; i++)
+				for (int i = 1; i < poly.InnerPolygonCount; i++)
 				{
 					RenderPolygon(g,
 						poly.GetInnerPoly(i),
-						junction.Point,
+						PointF.Empty,
 						new Color(color, 0, 0.5f));
 					color /= 1.5;
 				}
@@ -281,12 +305,74 @@ namespace MfGames.RunningBomb.GtkTunneler
 		{
 			// Set up the variables
 			PointF p = new PointF(cx + segmentPoint.X, cy + segmentPoint.Y);
-			double s2 = (handleSize / 2) / scale;
+			double s2 = (handleSize / 4) / scale;
 
 			// Draw a red circle
 			g.Color = new Color(0, 0, 0.75f);
 			g.Arc(p.X, p.Y, s2, 0, Math.PI * 2);
 			g.Fill();
+		}
+		#endregion
+		
+		#region Mouse Movement
+		private LinkedList<JunctionNode> junctionHandles =
+			new LinkedList<JunctionNode>();
+		private JunctionNode hoverJunctionNode;
+
+		/// <summary>
+		/// Triggered when the button is released (lifted).
+		/// </summary>
+		public void OnButtonRelease(object sender, ButtonReleaseEventArgs args)
+		{
+			// See if we have a hover
+			if (hoverJunctionNode != null)
+				selectedJunctionNode = hoverJunctionNode;
+				
+			// Force a redraw
+			QueueDraw();
+		}
+
+		/// <summary>
+		/// Triggered when the mouse is moved around the widget.
+		/// </summary>
+		public void OnMotionNotify(object sender, MotionNotifyEventArgs args)
+		{
+			// Get the x and y coordinates
+			double x, y;
+			
+			if (args.Event.IsHint)
+			{
+				Gdk.ModifierType m;
+				int ix, iy;
+				args.Event.Window.GetPointer(out ix, out iy, out m);
+				x = ix;
+				y = iy;
+			}
+			else
+			{
+				x = args.Event.X;
+				y = args.Event.Y;
+			}
+
+			double hs = handleSize / scale;
+			x = x / scale - cx;
+			y = y / scale - cy;
+
+			// Go through the list and see if we are near a handle
+			hoverJunctionNode = null;
+
+			foreach (JunctionNode jn in junctionHandles)
+			{
+				if (jn.Point.X - hs <= x && x <= jn.Point.X + hs &&
+					jn.Point.Y - hs <= y && y <= jn.Point.Y + hs)
+				{
+					hoverJunctionNode = jn;
+					break;
+				}
+			}
+			
+			// Force the drawing
+			QueueDraw();
 		}
 		#endregion
 
