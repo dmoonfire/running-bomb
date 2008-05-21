@@ -94,14 +94,6 @@ namespace MfGames.RunningBomb
 		}
 
 		/// <summary>
-		/// Contains the point in 2D space where this junction is
-		/// centered on. Typically, the starting one is located at
-		/// (0,0), but the rest of them would be a number of meters
-		/// away.
-		/// </summary>
-		public PointF Point;
-
-		/// <summary>
 		/// Generates the shape of the junction node.
 		/// </summary>
 		public void BuildShapes()
@@ -163,16 +155,9 @@ namespace MfGames.RunningBomb
 				ps = ps.Swap();
 				segments.Add(ps);
 
-				// Add both the parent junction and the segment to the
-				// overlap test to prevent overlapping.
-				JunctionNode pj = ps.ChildJunctionNode;
-				IPoly circleTest = Geometry.CreateCircle(
-					pj.Point,
-					Constants.OverlapConnectionDistance);
-				IPoly overlapTest = pj.InternalShape.Translate(Point)
-					.Union(ps.InternalShape);
-				overlapTest = overlapTest.Intersection(circleTest);
-				overlaps.Add(overlapTest);
+				// Add to the overlap, but don't bother checking (we
+				// are guarenteed to the first).
+				CheckOverlapIntersection(overlaps, ps);
 			}
 
 			// We want to create a random number of connections
@@ -197,43 +182,23 @@ namespace MfGames.RunningBomb
 				// Create a new junction at this point
 				JunctionNode junction = new JunctionNode(Random.Next());
 				junction.ParentJunctionNode = this;
-				junction.Point = point;
 				junction.BuildShapes();
 
-				// Start the overlap testing with just the junction to
-				// short-circuit it faster if there is an overlap.
-				if (HasIntersection(overlaps, junction.InternalShape))
-				{
-					Log.Debug("Rejected because junctions overlap");
-					continue;
-				}
-
-				// Get the segment factory
+				// Get the segment factory and create the segment
 				ISegmentFactory isf =
 					FactoryManager.ChooseSegmentFactory(junction);
-				Segment segment = isf.Create(junction);
+				Segment segment = isf.Create(junction, point);
 				segment.ParentJunctionNode = this;
 				segment.ChildJunctionNode = junction;
+				segment.ChildJunctionPoint = point;
 
-				// Test to see if there is an overlap with the current
-				// segments and junctions.
-				IPoly circleTest = Geometry.CreateCircle(
-					junction.Point, Constants.OverlapConnectionDistance);
-				IPoly overlapTest = junction.InternalShape.Translate(point)
-					.Union(segment.InternalShape);
-				overlapTest = overlapTest.Intersection(circleTest);
-
-				// If we have an overlap, we'll have too much
-				// difficulty figuring out where the player is going,
-				// so reject it.
-				if (HasIntersection(overlaps, segment.InternalShape))
+				// Check and add the overlap
+				if (CheckOverlapIntersection(overlaps, segment))
 				{
+					// We intersect
 					Log.Debug("Rejection because segments overlap");
 					continue;
 				}
-
-				// We don't overlap, so add it to the test
-				overlaps.Add(overlapTest);
 
 				// Add it to the segments
 				segments.Add(segment);
@@ -259,7 +224,7 @@ namespace MfGames.RunningBomb
 		/// Returns true if the shape intersects any of the shapes in
 		/// the list.
 		/// </summary>
-		private bool HasIntersection(IList<IPoly> overlaps, IPoly shape)
+		private bool HasOverlapIntersection(IList<IPoly> overlaps, IPoly shape)
 		{
 			// Go through the list
 			foreach (IPoly ip in overlaps)
@@ -267,6 +232,41 @@ namespace MfGames.RunningBomb
 					return true;
 
 			// No intersections
+			return false;
+		}
+
+		/// <summary>
+		/// Returns true if the segment overlaps with the current list.
+		/// </summary>
+		private bool CheckOverlapIntersection(
+			IList<IPoly> overlaps, Segment segment)
+		{
+			// First build up the overlap test shape
+			IPoly newShape = segment.ChildJunctionNode.InternalShape
+				.Translate(
+					segment.ChildJunctionPoint.X,
+					segment.ChildJunctionPoint.Y)
+				.Union(segment.InternalShape);
+
+			// Now check for an intersection with all the overlaps
+			foreach (IPoly overlap in overlaps)
+			{
+				// If we intersect, then there is an overlap
+				if (overlap.HasIntersection(newShape))
+					return true;
+			}
+
+			// While we check the entire length of the segment to
+			// prevent crossthroughs, we only store a slightly smaller
+			// junction which excludes the center bit to allow for
+			// that constant overlap.
+			IPoly circleTest = Geometry.CreateCircle(
+				PointF.Empty,
+				Constants.OverlapConnectionDistance);
+			IPoly toRemove = newShape.Intersection(circleTest);
+			overlaps.Add(newShape.Xor(toRemove));
+
+			// No intersections, so return false
 			return false;
 		}
 		#endregion

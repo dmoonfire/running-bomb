@@ -19,7 +19,7 @@ namespace MfGames.RunningBomb
 		/// <summary>
 		/// Creates a segment from a child junction to its parent.
 		/// </summary>
-		public Segment Create(JunctionNode childNode)
+		public Segment Create(JunctionNode childNode, PointF childPoint)
 		{
 			// Sanity checking
 			if (childNode.ParentJunctionNode == null)
@@ -32,7 +32,7 @@ namespace MfGames.RunningBomb
 			// Add the two end points
 			LinkedList<PointF> points = new LinkedList<PointF>();
 			points.Add(new PointF(0, 0));
-			points.Add(childNode.Point);
+			points.Add(childPoint);
 
 			// Split apart the line
 #if DEBUG
@@ -112,7 +112,7 @@ namespace MfGames.RunningBomb
 			// Show timing information
 			stopwatch.Stop();
 			Log.Debug("Polygon Time: {0}", stopwatch.Elapsed);
-			Log.Debug("Polygon Area: {0}", shape.GetArea());
+			Log.Debug("Polygon Area: {0}", shape.Area);
 			Log.Debug("Polygon Coun: {0}", shape.PointCount);
 			Log.Debug("Polygon Innr: {0}", shape.InnerPolygonCount);
 #endif

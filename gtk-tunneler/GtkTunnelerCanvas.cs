@@ -53,7 +53,7 @@ namespace MfGames.RunningBomb.GtkTunneler
 		private Gdk.Color background = new Gdk.Color(128, 128, 128);
 		private int width, height;
 		private double handleSize = 5;
-		private float scale = 1;
+		private float scale = 0.125f;
 		private float cx, cy;
 
 		/// <summary>
@@ -168,22 +168,10 @@ namespace MfGames.RunningBomb.GtkTunneler
 				foreach (Segment s in junction.Segments)
 				{
 					// Render the junction
-					if (s.IsSwapped)
-					{
-						RenderJunction(g,
-							s.ChildJunctionNode,
-							new PointF(
-								s.ChildJunctionNode.Point.X - junction.Point.X,
-								s.ChildJunctionNode.Point.Y - junction.Point.Y),
-							recursion);
-					}
-					else
-					{
-						RenderJunction(g,
-							s.ChildJunctionNode,
-							s.ChildJunctionNode.Point,
-							recursion);
-					}
+					RenderJunction(g,
+						s.ChildJunctionNode,
+						s.ChildJunctionPoint,
+						recursion);
 				}
 
 				// Got through the shapes
@@ -193,24 +181,12 @@ namespace MfGames.RunningBomb.GtkTunneler
 					RenderSegment(g, s);
 
 					// Render and save the junction handles
-					if (s.IsSwapped)
-					{
-						RenderJunctionHandle(
-							g,
-							new PointF(
-								s.ChildJunctionNode.Point.X - junction.Point.X,
-								s.ChildJunctionNode.Point.Y - junction.Point.Y),
-							s.IsSwapped,
-							s.ChildJunctionNode == hoverJunctionNode);
-					}
-					else
-					{
-						RenderJunctionHandle(
-							g,
-							s.ChildJunctionNode.Point,
-							s.IsSwapped,
-							s.ChildJunctionNode == hoverJunctionNode);
-					}
+					RenderJunctionHandle(
+						g,
+					s.ChildJunctionPoint,
+						s.ChildJunctionNode
+						== selectedJunctionNode.ParentJunctionNode,
+						s.ChildJunctionNode == hoverJunctionNode);
 
 					// Save the point
 					junctionHandles.Add(s);
@@ -407,16 +383,7 @@ namespace MfGames.RunningBomb.GtkTunneler
 			{
 				// Get the point, swapping it if needed
 				JunctionNode jn = s.ChildJunctionNode;
-				PointF p = jn.Point;
-
-				if (s.IsSwapped)
-				{
-					JunctionNode junction = s.ParentJunctionNode;
-
-					p = new PointF(
-						s.ChildJunctionNode.Point.X - junction.Point.X,
-						s.ChildJunctionNode.Point.Y - junction.Point.Y);
-				}
+				PointF p = s.ChildJunctionPoint;
 
 				// See if we are in range
 				if (p.X - hs <= x && x <= p.X + hs &&

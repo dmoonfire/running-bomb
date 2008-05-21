@@ -134,7 +134,7 @@ namespace MfGames.RunningBomb.GtkTunneler
 		/// </summary>
 		private void OnZoomReset(object o, EventArgs e)
 		{
-			canvas.Scale = 1;
+			canvas.Scale = 0.125f;
 			canvas.QueueDraw();
 		}
 		#endregion

@@ -1,3 +1,5 @@
+using System.Drawing;
+
 namespace MfGames.RunningBomb
 {
 	/// <summary>
@@ -8,6 +10,6 @@ namespace MfGames.RunningBomb
 		/// <summary>
 		/// Creates a segment from a child junction to its parent.
 		/// </summary>
-		Segment Create(JunctionNode childJunction);
+		Segment Create(JunctionNode childJunction, PointF childPoint);
 	}
 }

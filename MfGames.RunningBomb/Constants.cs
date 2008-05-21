@@ -21,7 +21,7 @@ namespace MfGames.RunningBomb
 		/// This is the distance, in meters, from a child junction to
 		/// test for overlap.
 		/// </summary>
-		public const float OverlapConnectionDistance = 1500;
+		public const float OverlapConnectionDistance = 2000;
 
 		public const float PI = (float) Math.PI;
 		public const float PI2 = (float) Math.PI * 2f;

@@ -14,7 +14,6 @@ namespace MfGames.RunningBomb
 	{
 		#region Junctions
 		private JunctionNode parent, child;
-		private bool swapped;
 
 		/// <summary>
 		/// Sets the child junction node for this segment.
@@ -32,6 +31,12 @@ namespace MfGames.RunningBomb
 		}
 
 		/// <summary>
+		/// Contains the point in 2D space where this junction is
+		/// related to the parent node.
+		/// </summary>
+		public PointF ChildJunctionPoint;
+
+		/// <summary>
 		/// Sets the parent junction node for this segment.
 		/// </summary>
 		public JunctionNode ParentJunctionNode
@@ -44,14 +49,6 @@ namespace MfGames.RunningBomb
 
 				parent = value;
 			}
-		}
-
-		/// <summary>
-		/// Returns true if this is a swapped or reversed segment.
-		/// </summary>
-		public bool IsSwapped
-		{
-			get { return swapped; }
 		}
 		#endregion
 
@@ -87,25 +84,18 @@ namespace MfGames.RunningBomb
 		{
 			// Create a new segment
 			Segment s = new Segment();
-			s.swapped = !swapped;
 			s.child = parent;
 			s.parent = child;
+			s.ChildJunctionPoint = new PointF(
+				-ChildJunctionPoint.X,
+				-ChildJunctionPoint.Y);
 
-			// Reverse the polygon of the segment
-			double dx = -child.Point.X;
-			double dy = -child.Point.Y;
-			PolyDefault ps = new PolyDefault();
-			int count = internalShape.PointCount;
+			// Reverse the relative coordinates of the segment
+			double dx = -ChildJunctionPoint.X;
+			double dy = -ChildJunctionPoint.Y;
 
-			for (int i = 0; i < count; i++)
-			{
-				double x = dx + internalShape.GetX(i);
-				double y = dy + internalShape.GetY(i);
-
-				ps.Add(x, y);
-			}
-
-			s.internalShape = ps;
+			// Shift the polygon over as appropriate
+			s.internalShape = internalShape.Translate(dx, dy);
 
 			// Reverse the center lines
 			foreach (PointF pf in centerPoints)
