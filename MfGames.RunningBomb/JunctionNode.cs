@@ -169,7 +169,7 @@ namespace MfGames.RunningBomb
 				IPoly circleTest = Geometry.CreateCircle(
 					pj.Point,
 					Constants.OverlapConnectionDistance);
-				IPoly overlapTest = pj.InternalShape
+				IPoly overlapTest = pj.InternalShape.Translate(Point)
 					.Union(ps.InternalShape);
 				overlapTest = overlapTest.Intersection(circleTest);
 				overlaps.Add(overlapTest);
@@ -219,7 +219,7 @@ namespace MfGames.RunningBomb
 				// segments and junctions.
 				IPoly circleTest = Geometry.CreateCircle(
 					junction.Point, Constants.OverlapConnectionDistance);
-				IPoly overlapTest = junction.InternalShape
+				IPoly overlapTest = junction.InternalShape.Translate(point)
 					.Union(segment.InternalShape);
 				overlapTest = overlapTest.Intersection(circleTest);
 
