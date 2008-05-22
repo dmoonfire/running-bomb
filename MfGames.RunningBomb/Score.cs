@@ -9,22 +9,33 @@ namespace MfGames.RunningBomb
 	public class Score
 	{
 		#region Properties
-		private double meters;
+		private double distance;
 		private long killed;
 
 		/// <summary>
-		/// Contains the distance in meters that the shape has
+		/// Contains the distance in distance that the shape has
 		/// traveled.
 		/// </summary>
-		public double Meters
+		public double Distance
 		{
-			get { return meters; }
+			get { return distance; }
 			set
 			{
 				if (value < 0)
-					throw new Exception("Cannot set a negative meters");
+					throw new Exception("Cannot set a negative distance");
 
-				meters = value;
+				distance = value;
+			}
+		}
+
+		/// <summary>
+		/// Contains the percentage saved, in terms of 0 to 1.
+		public float PercentageSaved
+		{
+			get
+			{
+				return (float) PopulationSaved
+					/ (float) Constants.StartingPopulation;
 			}
 		}
 
@@ -53,19 +64,17 @@ namespace MfGames.RunningBomb
 			{
 				// If we are past the player safe distance, we only
 				// have those killed by the player.
-				if (Meters >= Constants.PlayerSafeDistance)
-					return Constants.StartingPopulation - PopulationKilled - 1;
+				if (Distance >= Constants.PlayerSafeDistance)
+					return Constants.StartingPopulation - PopulationKilled;
 
 				// If we are past the bomb safe distance, we have the
 				// player and anyone they killed
-				if (Meters >= Constants.BombSafeDistance)
-					return Constants.StartingPopulation - PopulationKilled;
-				
+				if (Distance >= Constants.BombSafeDistance)
+					return Constants.StartingPopulation - PopulationKilled - 1;
+
 				// Otherwise, it is a formula based on distance
-				return (long) Math.Min(0,
-					Constants.StartingPopulation
-					- Math.Pow(Meters, 2)
-					- PopulationKilled);
+				return (long) Math.Max(0,
+					Math.Pow(Distance, 2) - PopulationKilled);
 			}
 		}
 
@@ -76,10 +85,10 @@ namespace MfGames.RunningBomb
 		{
 			get
 			{
-				double score = Math.Round(1000.0
+				double score = 1000
 					* Math.Log(PopulationSaved, 10)
-					* Math.Log(Meters, 10)
-					* BadgeTotal, 0);
+					* Math.Log(Distance, 10)
+					* BadgeTotal;
 				return (int) score;
 			}
 		}
@@ -94,7 +103,7 @@ namespace MfGames.RunningBomb
 		{
 			get
 			{
-				return 0;
+				return 1;
 			}
 		}
 		#endregion

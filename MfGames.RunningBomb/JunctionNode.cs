@@ -77,6 +77,23 @@ namespace MfGames.RunningBomb
 		#region Geometry
 		private bool builtShape = false;
 		private IPoly internalShape;
+		private double distance;
+
+		/// <summary>
+		/// Contains the distance of the center of the junction node
+		/// from its parent.
+		/// </summary>
+		public double Distance
+		{
+			get { return distance; }
+			set
+			{
+				if (value < 0)
+					throw new Exception("Cannot set a negative distance");
+
+				distance = value;
+			}
+		}
 
 		/// <summary>
 		/// This is the poly that is used to describe the internal
@@ -192,6 +209,10 @@ namespace MfGames.RunningBomb
 				segment.ChildJunctionNode = junction;
 				segment.ChildJunctionPoint = point;
 
+				// Set the junction's distance
+				junction.Distance =
+					Distance + 10 * segment.CenterPoints.MaximumRelativeDistance;
+
 				// Check and add the overlap
 				if (CheckOverlapIntersection(overlaps, segment))
 				{
@@ -218,21 +239,6 @@ namespace MfGames.RunningBomb
 					return s;
 
 			return null;
-		}
-
-		/// <summary>
-		/// Returns true if the shape intersects any of the shapes in
-		/// the list.
-		/// </summary>
-		private bool HasOverlapIntersection(IList<IPoly> overlaps, IPoly shape)
-		{
-			// Go through the list
-			foreach (IPoly ip in overlaps)
-				if (shape.HasIntersection(ip))
-					return true;
-
-			// No intersections
-			return false;
 		}
 
 		/// <summary>

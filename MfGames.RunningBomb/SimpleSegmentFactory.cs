@@ -30,9 +30,9 @@ namespace MfGames.RunningBomb
 			JunctionNode parentNode = childNode.ParentJunctionNode;
 
 			// Add the two end points
-			LinkedList<PointF> points = new LinkedList<PointF>();
-			points.Add(new PointF(0, 0));
-			points.Add(childPoint);
+			CenterPointList points = new CenterPointList();
+			points.Add(new CenterPoint(0, 0));
+			points.Add(new CenterPoint(childPoint));
 
 			// Split apart the line
 #if DEBUG
@@ -58,7 +58,7 @@ namespace MfGames.RunningBomb
 			// entire segment.
 			IPoly shape = null;
 
-			foreach (PointF point in points)
+			foreach (CenterPoint point in points)
 			{
 				// Keep track of our retries
 				int retry = 1;
@@ -66,7 +66,7 @@ namespace MfGames.RunningBomb
 				while (true)
 				{
 					// Create a shape
-					IPoly p = Geometry.CreateShape(parentNode, point,
+					IPoly p = Geometry.CreateShape(parentNode, point.Point,
 						retry * Constants.SegmentAverageWidth);
 
 					// If we have no shape, this is automatically
@@ -111,15 +111,23 @@ namespace MfGames.RunningBomb
 #if DEBUG
 			// Show timing information
 			stopwatch.Stop();
-			Log.Debug("Polygon Time: {0}", stopwatch.Elapsed);
-			Log.Debug("Polygon Area: {0}", shape.Area);
-			Log.Debug("Polygon Coun: {0}", shape.PointCount);
-			Log.Debug("Polygon Innr: {0}", shape.InnerPolygonCount);
+			Log.Debug("  Shape Time: {0}", stopwatch.Elapsed);
+			stopwatch.Reset();
+			stopwatch.Start();
 #endif
 
 			// Add the shape to the list
 			segment.InternalShape = shape;
+
+			// Set up the center line and optimize it
 			segment.CenterPoints.AddAll(points);
+			segment.CenterPoints.Optimize();
+
+#if DEBUG
+			// Show timing information
+			stopwatch.Stop();
+			Log.Debug("Optimze Time: {0}", stopwatch.Elapsed);
+#endif
 
 			// Return the results
 			return segment;

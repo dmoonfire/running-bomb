@@ -94,7 +94,7 @@ namespace MfGames.RunningBomb
 		/// </summary>
 		/// <returns>A true if at least one point was changed.</returns>
 		public static bool StaggerPoints(
-			IList<PointF> points,
+			CenterPointList points,
 			MersenneRandom random,
 			float minimumDistance)
 		{
@@ -109,26 +109,26 @@ namespace MfGames.RunningBomb
 				return false;
 
 			// Go through each set of points
-			LinkedList<PointF> newPoints = new LinkedList<PointF>();
+			CenterPointList newPoints = new CenterPointList();
 			bool changed = false;
 
 			for (int i = 0; i < points.Count - 1; i++)
 			{
 				// Get the points
-				PointF p1 = points[i];
-				PointF p2 = points[i + 1];
+				CenterPoint p1 = points[i];
+				CenterPoint p2 = points[i + 1];
 
 				// Add the first point
 				newPoints.Add(p1);
 
 				// Get the distance
-				float distance = CalculateDistance(p1, p2);
+				float distance = CalculateDistance(p1.Point, p2.Point);
 
 				if (distance > minimumDistance)
 				{
 					// These two are far enough to calculate a new point
-					PointF mp =
-						new PointF((p1.X + p2.X) / 2, (p1.Y + p2.Y) / 2);
+					CenterPoint mp =
+						new CenterPoint((p1.X + p2.X) / 2, (p1.Y + p2.Y) / 2);
 					float delta = distance * Constants.FractalDecay;
 					float diff = random.NextSingle(-delta, delta);
 
@@ -182,7 +182,7 @@ namespace MfGames.RunningBomb
 		/// Loops through the points and staggers them repeatedly.
 		/// </summary>
 		public static void StaggerPoints(
-			IList<PointF> points,
+			CenterPointList points,
 			MersenneRandom random,
 			float minimumDistance,
 			int passes)

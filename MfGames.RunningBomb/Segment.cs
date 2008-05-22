@@ -54,13 +54,12 @@ namespace MfGames.RunningBomb
 
 		#region Nodes
 		private IPoly internalShape;
-		private LinkedList<PointF> centerPoints =
-			new LinkedList<PointF>();
+		private CenterPointList centerPoints = new CenterPointList();
 
 		/// <summary>
 		/// Contains a list of the center-line points for the segment.
 		/// </summary>
-		public IList<PointF> CenterPoints
+		public CenterPointList CenterPoints
 		{
 			get { return centerPoints; }
 		}
@@ -98,10 +97,10 @@ namespace MfGames.RunningBomb
 			s.internalShape = internalShape.Translate(dx, dy);
 
 			// Reverse the center lines
-			foreach (PointF pf in centerPoints)
+			foreach (CenterPoint cp in centerPoints)
 			{
 				s.centerPoints.Add(
-					new PointF((float) dx + pf.X, (float) dy + pf.Y));
+					new CenterPoint((float) dx + cp.X, (float) dy + cp.Y));
 			}
 
 			// Return the results

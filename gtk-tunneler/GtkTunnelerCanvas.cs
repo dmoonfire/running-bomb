@@ -121,6 +121,29 @@ namespace MfGames.RunningBomb.GtkTunneler
 				// Draw all the junctions
 				junctionHandles.Clear();
 				RenderJunction(g, selectedJunctionNode, PointF.Empty, 1);
+
+				// Set up the score object
+				Score score = new Score();
+				score.Distance = selectedJunctionNode.Distance;
+
+				// Draw out the current distance
+				g.SetFontSize(12 / scale);
+				g.SelectFontFace("Mono", FontSlant.Normal, FontWeight.Bold);
+				g.Color = new Color(0, 0, 0);
+				g.LineWidth = 1;
+				g.MoveTo(15 / scale, 15 / scale);
+				g.ShowText("  Distance: " + score.Distance.ToString("N4"));
+				g.MoveTo(15 / scale, 30 / scale);
+				g.ShowText("     Score: " + score.PlayerScore.ToString("N0"));
+				g.MoveTo(15 / scale, 45 / scale);
+				g.ShowText("     Saved: "
+					+ score.PopulationSaved.ToString("N0")
+					+ " ("
+					+ (score.PercentageSaved * 100).ToString("N4")
+					+ "%)");
+				g.MoveTo(15 / scale, 60 / scale);
+				g.ShowText("Population: "
+					+ Constants.StartingPopulation.ToString("N0"));
 			}
 			finally
 			{
@@ -311,7 +334,7 @@ namespace MfGames.RunningBomb.GtkTunneler
 			}
 				
 			// Draw the center points
-			foreach (PointF point in segment.CenterPoints)
+			foreach (CenterPoint point in segment.CenterPoints)
 				RenderSegmentHandle(g, point);
 		}
 
@@ -319,7 +342,7 @@ namespace MfGames.RunningBomb.GtkTunneler
 		/// Draws a little widget in the center to indicate the center of
 		/// the segment point.
 		/// </summary>
-		private void RenderSegmentHandle(Context g, PointF segmentPoint)
+		private void RenderSegmentHandle(Context g, CenterPoint segmentPoint)
 		{
 			// Set up the variables
 			PointF p = new PointF(cx + segmentPoint.X, cy + segmentPoint.Y);

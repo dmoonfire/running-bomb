@@ -30,7 +30,11 @@ namespace MfGames.RunningBomb
 		/// Determines how fast a fractal breaks down, the closer to 0
 		/// the straighter the line.
 		/// </summary>
-		public const float FractalDecay = 0.25f;
+		/// <remarks>
+		/// The smaller this number, the straighter the lines and
+		/// faster it renders.
+		/// </remarks>
+		public const float FractalDecay = 0.1f;
 
 		/// <summary>
 		/// The minimum number of meters to break a segment into.
