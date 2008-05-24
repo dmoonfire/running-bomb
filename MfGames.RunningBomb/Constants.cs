@@ -26,6 +26,8 @@ namespace MfGames.RunningBomb
 		public const float PI = (float) Math.PI;
 		public const float PI2 = (float) Math.PI * 2f;
 
+		public const float RadiansToDegrees = 57.2957795f;
+
 		/// <summary>
 		/// Determines how fast a fractal breaks down, the closer to 0
 		/// the straighter the line.

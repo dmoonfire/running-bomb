@@ -41,9 +41,12 @@ if test "x$PKG_CONFIG" = "xno"; then
 fi
 
 dnl MfGames.Utility
+PKG_CHECK_MODULES(mfgames_input, mfgames-input-3.0)
 PKG_CHECK_MODULES(mfgames_utility, mfgames-utility-3.0)
+PKG_CHECK_MODULES(mfgames_sprite3_works, mfgames-sprite3-works-0.0)
 
 dnl BooGame
+PKG_CHECK_MODULES(boogame, boogame-2.0)
 
 dnl Gpc
 PKG_CHECK_MODULES(gpc, gpc-sharp-0.0)

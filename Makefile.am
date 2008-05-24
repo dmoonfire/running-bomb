@@ -11,6 +11,10 @@ mfgames_runningbomb_FILES =  \
 	MfGames.RunningBomb/Draw/IDrawable.cs \
 	MfGames.RunningBomb/Draw/DrawingCommands.cs \
 	MfGames.RunningBomb/Draw/DrawingCommandsReader.cs \
+	MfGames.RunningBomb/Physics.cs \
+	MfGames.RunningBomb/Mobile.cs \
+	MfGames.RunningBomb/Player.cs \
+	MfGames.RunningBomb/State.cs \
 	MfGames.RunningBomb/JunctionNode.cs \
 	MfGames.RunningBomb/IJunctionFactory.cs \
 	MfGames.RunningBomb/RadialJunctionFactory.cs \
@@ -42,10 +46,20 @@ gtk_tunneler_FILES =  \
 	gtk-tunneler/GtkTunnelerFrame.cs \
 	gtk-tunneler/GtkTunnelerCanvas.cs
 
+runningbomb_ASSEMBLY_NAME = running-bomb
+runningbomb_EXE = $(runningbomb_ASSEMBLY_NAME).exe
+runningbomb_ASSEMBLY = $(BUILD)/$(runningbomb_EXE)
+runningbomb_FILES =  \
+	running-bomb/NewGameMode.cs \
+	running-bomb/HudAbstractMode.cs \
+	running-bomb/DisplayUniverseAbstractMode.cs \
+	running-bomb/RunningGameMode.cs \
+	running-bomb/RunningBombEntry.cs
+
 # Generic
 all: $(mfgames_runningbomb_ASSEMBLY) $(gtk_drawer_ASSEMBLY)
-all: $(gtk_tunneler_ASSEMBLY)
-	cp libs/C5.dll build
+all: $(gtk_tunneler_ASSEMBLY) $(runningbomb_ASSEMBLY)
+	cp libs/*.dll build
 
 clean-local:
 	$(RM) -rf $(BUILD)
@@ -58,8 +72,11 @@ $(mfgames_runningbomb_ASSEMBLY): $(mfgames_runningbomb_FILES) Makefile
 		-doc:$(BUILD)/MfGames.RunningBomb.xml \
 		/d:TRACE /d:DEBUG \
 		@mfgames_utility_LIBS@ \
-		-r:libs/C5.dll \
+		@mfgames_sprite3_works_LIBS@ \
 		@gpc_LIBS@ \
+		-r:libs/C5.dll \
+		-r:libs/AdvanceMath.dll \
+		-r:libs/Physics2DDotNet.dll \
 		-r:System.Drawing \
 		$(realpath $(mfgames_runningbomb_FILES))
 	chmod a-x $@
@@ -86,8 +103,8 @@ $(gtk_tunneler_ASSEMBLY): gtk-tunneler/ui.xml
 	mkdir -p $(BUILD)
 	$(CSC) -debug $(CSC_FLAGS) -target:winexe -out:$@ \
 		/d:TRACE /d:DEBUG \
-		@mfgames_utility_LIBS@ \
 		-r:libs/C5.dll \
+		@mfgames_utility_LIBS@ \
 		@gpc_LIBS@ \
 		-r:System.Drawing \
 		-r:$(mfgames_runningbomb_ASSEMBLY) \
@@ -96,6 +113,23 @@ $(gtk_tunneler_ASSEMBLY): gtk-tunneler/ui.xml
 		-pkg:rsvg-sharp-2.0 \
 		-resource:gtk-tunneler/ui.xml \
 		$(realpath $(gtk_tunneler_FILES))
+	chmod a+x $@
+
+$(runningbomb_ASSEMBLY): $(runningbomb_FILES) $(mfgames_runningbomb_ASSEMBLY)
+	mkdir -p $(BUILD)
+	$(CSC) -debug $(CSC_FLAGS) -target:winexe -out:$@ \
+		/d:TRACE /d:DEBUG \
+		@boogame_LIBS@ \
+		@mfgames_input_LIBS@ \
+		@mfgames_utility_LIBS@ \
+		@mfgames_sprite3_works_LIBS@ \
+		@gpc_LIBS@ \
+		-r:libs/C5.dll \
+		-r:libs/AdvanceMath.dll \
+		-r:libs/Physics2DDotNet.dll \
+		-r:System.Drawing \
+		-r:$(mfgames_runningbomb_ASSEMBLY) \
+		$(realpath $(runningbomb_FILES))
 	chmod a+x $@
 
 # Installation

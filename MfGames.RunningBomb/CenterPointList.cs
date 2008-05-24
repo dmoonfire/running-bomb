@@ -77,7 +77,6 @@ namespace MfGames.RunningBomb
 			}
 
 			// Go back through the list and build up the distances
-			float relativeDistance = 0;
 			lastPoint = cpl[0];
 			lastPoint.RelativeDistance = 0;
 			count = cpl.Count;

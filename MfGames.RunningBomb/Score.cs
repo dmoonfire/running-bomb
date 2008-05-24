@@ -30,6 +30,7 @@ namespace MfGames.RunningBomb
 
 		/// <summary>
 		/// Contains the percentage saved, in terms of 0 to 1.
+		/// </summary>
 		public float PercentageSaved
 		{
 			get
