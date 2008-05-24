@@ -1,8 +1,13 @@
 using C5;
 using Gpc;
 using MfGames.Utility;
+using Physics2DDotNet.Shapes;
 using System;
+#if DEBUG
+using System.Diagnostics;
+#endif
 using System.Drawing;
+using Vector2D = AdvanceMath.Vector2D;
 
 namespace MfGames.RunningBomb
 {
@@ -69,6 +74,7 @@ namespace MfGames.RunningBomb
 			internalShape = null;
 			shape = null;
 			segments.Clear();
+			physicsShapes.Clear();
 
 			// Reset the random value
 			random = new MersenneRandom(randomSeed);
@@ -117,27 +123,7 @@ namespace MfGames.RunningBomb
 		/// </summary>
 		public IPoly Shape
 		{
-			get
-			{
-				// See if we already have it
-				if (shape != null)
-					return shape;
-
-				// Get the internal shape (this builds the internal)
-				shape = InternalShape;
-
-				// Add all the segments (this builds segments)
-				foreach (Segment s in Segments)
-				{
-					// Add the segment
-					shape = shape.Union(s.InternalShape);
-					shape = shape.Union(s.ChildJunction.InternalShape.Translate(
-							s.ChildJunctionPoint.X, s.ChildJunctionPoint.Y));
-				}
-
-				// Return the results
-				return shape;
-			}
+			get { BuildCombinedShape(); return shape; }
 		}
 
 		/// <summary>
@@ -153,10 +139,63 @@ namespace MfGames.RunningBomb
 			IJunctionFactory ijf = FactoryManager.ChooseJunctionFactory(random);
 			ijf.Create(this);
 		}
+
+		/// <summary>
+		/// Builds the internal shape of the junction and all
+		/// children.
+		/// </summary>
+		private void BuildCombinedShape()
+		{
+			// Don't bother if we aren't null
+			if (shape != null)
+				return;
+
+			// Get the internal shape (this builds the internal)
+			shape = InternalShape.Duplicate();
+			
+			// Add all the segments (this builds segments)
+			foreach (Segment s in segments)
+			{
+				// Add the segment
+				shape = shape.Union(s.InternalShape);
+				shape = shape.Union(s.ChildJunction.InternalShape.Translate(
+						s.ChildJunctionPoint.X, s.ChildJunctionPoint.Y));
+			}
+			
+			Log.Debug("Created shape 1: {0} inner {1} points",
+				shape.InnerPolygonCount, shape.PointCount);
+
+			// See if we have multiple inner shapes
+			if (shape.InnerPolygonCount > 1)
+			{
+				// Try to merge them properly together
+				IPoly pd = new PolyDefault();
+				
+				for (int i = 0; i < shape.InnerPolygonCount; i++)
+				{
+					IPoly ip = shape.GetInnerPoly(i);
+					
+					if (ip.IsHole())
+					{
+						pd.Add(ip);
+						continue;
+					}
+					else
+					{
+						pd = pd.Union(ip);
+					}
+				}
+				
+				shape = pd;
+				Log.Debug("Created shape 2: {0} inner {1} points",
+					shape.InnerPolygonCount, shape.PointCount);
+			}
+		}
 		#endregion
 
 		#region Segments and Junctions
 		private bool builtConnections = false;
+		private bool isBuildingConnections = false;
 		private LinkedList<Segment> segments =
 			new LinkedList<Segment>();
 
@@ -182,6 +221,12 @@ namespace MfGames.RunningBomb
 			// Don't bother if we have connections already
 			if (builtConnections)
 				return;
+
+			// Sanity checking
+			if (isBuildingConnections)
+				throw new Exception("Building connections is not reentrant");
+
+			isBuildingConnections = true;
 
 			// Make sure our shapes are built to keep the order consistent
 			BuildShapes();
@@ -255,8 +300,22 @@ namespace MfGames.RunningBomb
 				segments.Add(segment);
 			}
 
+			// Create the physics shapes
+#if DEBUG
+			Stopwatch stopwatch = Stopwatch.StartNew();
+#endif
+			BuildCombinedShape();
+			CreateJunctionPhysics(0);
+
+#if DEBUG
+			// Show timing information
+			stopwatch.Stop();
+			Log.Debug("Physics Creation: {0}", stopwatch.Elapsed);
+#endif
+
 			// We are done
 			builtConnections = true;
+			isBuildingConnections = false;
 		}
 
 		/// <summary>
@@ -304,6 +363,132 @@ namespace MfGames.RunningBomb
 
 			// No intersections, so return false
 			return false;
+		}
+		#endregion
+
+		#region Physics
+		private LinkedList<IShape> physicsShapes =
+			new LinkedList<IShape>();
+
+		/// <summary>
+		/// Contains a list of shapes for the physics engine, an
+		/// inverse of the area's shape.
+		/// </summary>
+		public IList<IShape> PhysicsShapes
+		{
+			get { BuildConnections(); return physicsShapes; }
+		}
+
+		/// <summary>
+		/// Adds a junction data to the physics layer.
+		/// </summary>
+		private void CreateJunctionPhysics(int depth)
+		{
+			// Create the initial junction, then create a box slightly
+			// larger than it and XOR the results to get an inverse
+			// shape (i.e. with the hole being where the players
+			// go). We call Shape to force the creation of the shape.
+			IPoly poly = Shape;
+			RectangleF bounds = poly.Bounds;
+			bounds.Inflate(10, 10);
+			IPoly rectangle = Geometry.CreateRectangle(bounds);
+			IPoly inverse = poly.Xor(rectangle);
+
+			// Recursively process and add the junctions
+			CreateJunctionPhysics(depth, inverse, bounds);
+
+			// Make some noise
+			Log.Info("Adding {0} physics shapes", physicsShapes.Count);
+		}
+
+		/// <summary>
+		/// Recursively process the polygon to attempt to find a
+		/// single polygon element that could be added to the physics
+		/// layer without any holes or additional physics.
+		/// </summary>
+		private void CreateJunctionPhysics(
+			int depth, IPoly poly, RectangleF bounds)
+		{
+			// Ignore empty polygons
+			if (poly.InnerPolygonCount == 0)
+				return;
+
+			// See if we are a solid polygon
+			double areaDifference = bounds.Width * bounds.Height - poly.Area;
+
+			if (poly.InnerPolygonCount == 1)
+			{
+				if (poly.IsHole())
+					// Don't add holes
+					return;
+
+				if (poly.PointCount == 4 && areaDifference <= 0.1f)
+					// We appear to be at least mostly solid, drop it
+					return;
+			}
+
+			// If we have more than one polygon, split it
+			if (poly.InnerPolygonCount > 1 ||
+				bounds.Width > Constants.MaximumJunctionPhysicsBlock ||
+				bounds.Height > Constants.MaximumJunctionPhysicsBlock)
+			{
+				// We split the polygon into quads and process each
+				// one to add it recursively.
+				CreateJunctionPhysics(depth + 1, poly, bounds, 0, 0);
+				CreateJunctionPhysics(depth + 1, poly, bounds, 0, 1);
+				CreateJunctionPhysics(depth + 1, poly, bounds, 1, 1);
+				CreateJunctionPhysics(depth + 1, poly, bounds, 1, 0);
+				return;
+			}
+
+			// We should never get a hole
+			if (poly.IsHole())
+			{
+				// We shouldn't get this
+				Log.Error("Got a top-level polygon hole");
+				return;
+			}
+
+			// Create a polygon shape as vectors
+			LinkedList<Vector2D> vectors = new LinkedList<Vector2D>();
+
+			for (int i = 0; i < poly.PointCount; i++)
+			{
+				// Get the coordinates
+				float x = (float) poly.GetX(i);
+				float y = (float) poly.GetY(i);
+
+				// Create the vector
+				vectors.Add(new Vector2D(x, y));
+			}
+
+			// Convert it into a physics2d polygon shape
+			Vector2D [] array = vectors.ToArray();
+			IShape ps = new PolygonShape(array, 1f);
+			physicsShapes.Add(ps);
+		}
+
+		/// <summary>
+		/// Splits apart a polygon into a quad and processes it for physics.
+		/// </summary>
+		private void CreateJunctionPhysics(
+			int depth,
+			IPoly poly, RectangleF bounds,
+			int row, int col)
+		{
+			// Figure out the desired size and shape
+			SizeF size = new SizeF(bounds.Width / 2, bounds.Height / 2);
+			PointF point = new PointF(
+				bounds.X + col * bounds.Width / 2,
+				bounds.Y + row * bounds.Height / 2);
+			RectangleF rect = new RectangleF(point, size);
+
+			// Create the GPC polygon and calculate the intersection
+			IPoly rectangle = Geometry.CreateRectangle(rect);
+			IPoly intersection = rectangle.Intersection(poly);
+
+			// Process this one
+			CreateJunctionPhysics(depth, intersection, rect);
 		}
 		#endregion
 

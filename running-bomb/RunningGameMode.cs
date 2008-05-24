@@ -20,7 +20,7 @@ namespace RunningBomb
 		public override bool OnInputActivated(InputEventArgs args)
 		{
 			// Make some noise
-			Log.Debug("OnInputActivated: {0}", args.Token);
+			//Log.Debug("OnInputActivated: {0}", args.Token);
 
 			// Figure out what to do
 			switch (args.Token)

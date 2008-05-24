@@ -52,6 +52,20 @@ namespace MfGames.RunningBomb
 		}
 
 		/// <summary>
+		/// Constructs a rectangle shape for GPC from the given
+		/// bounds.
+		/// </summary>
+		public static IPoly CreateRectangle(RectangleF bounds)
+		{
+			IPoly rectangle = new PolyDefault();
+			rectangle.Add(bounds.Left, bounds.Top);
+			rectangle.Add(bounds.Right, bounds.Top);
+			rectangle.Add(bounds.Right, bounds.Bottom);
+			rectangle.Add(bounds.Left, bounds.Bottom);
+			return rectangle;
+		}
+
+		/// <summary>
 		/// Creates a polygon-based shape around a single point of a
 		/// random size. The radiusMultiplier is used to increase the
 		/// size to ensure that it connects to another shape (if that

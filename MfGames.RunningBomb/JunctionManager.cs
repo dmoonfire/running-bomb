@@ -2,6 +2,7 @@ using C5;
 using Gpc;
 using MfGames.Utility;
 using Physics2DDotNet;
+using Physics2DDotNet.Shapes;
 using System;
 using System.Drawing;
 
@@ -43,7 +44,7 @@ namespace MfGames.RunningBomb
 					return;
 
 				// Add ourselves to the physics
-				AddJunctionPhysics(0);
+				AddJunctionPhysics();
 			}
 		}
 		#endregion
@@ -60,110 +61,15 @@ namespace MfGames.RunningBomb
 		}
 
 		/// <summary>
-		/// Adds a junction data to the physics layer.
+		/// Adds the junctions physics to this object.
 		/// </summary>
-		private void AddJunctionPhysics(int depth)
+		private void AddJunctionPhysics()
 		{
-			// Create the initial junction, then create a box slightly
-			// larger than it and XOR the results to get an inverse
-			// shape (i.e. with the hole being where the players go).
-			IPoly shape = junction.Shape.Duplicate();
-			RectangleF bounds = shape.Bounds;
-			bounds.Inflate(10, 10);
-			IPoly rectangle = CreateRectangle(bounds);
-			IPoly inverse = shape.Xor(rectangle);
-
-			// Recursively process and add the junctions
-			AddJunctionPhysics(depth, inverse, bounds);
-
-			// Make some noise
-			Log.Info("Adding {0} junction physic blocks", junctionBodies.Count);
-		}
-
-		/// <summary>
-		/// Recursively process the polygon to attempt to find a
-		/// single polygon element that could be added to the physics
-		/// layer without any holes or additional physics.
-		/// </summary>
-		private void AddJunctionPhysics(
-			int depth, IPoly poly, RectangleF bounds)
-		{
-			// Ignore empty polygons
-			if (poly.InnerPolygonCount == 0)
-				return;
-
-			// See if we are a solid polygon
-			double areaDifference = bounds.Width * bounds.Height - poly.Area;
-
-			if (poly.InnerPolygonCount == 1 &&
-				poly.PointCount == 4 &&
-				areaDifference <= 0.1f)
+			foreach (IShape shape in junction.PhysicsShapes)
 			{
-				// We appear to be at least mostly solid, drop it
-				return;
+				Body body = State.Physics.AddImmobile(shape);
+				junctionBodies.Add(body);
 			}
-
-			// If we have more than one polygon, split it
-			if (poly.InnerPolygonCount > 1 ||
-				bounds.Width > Constants.MaximumJunctionPhysicsBlock ||
-				bounds.Height > Constants.MaximumJunctionPhysicsBlock)
-			{
-				// We split the polygon into quads and process each
-				// one to add it recursively.
-				AddJunctionPhysics(depth + 1, poly, bounds, 0, 0);
-				AddJunctionPhysics(depth + 1, poly, bounds, 0, 1);
-				AddJunctionPhysics(depth + 1, poly, bounds, 1, 1);
-				AddJunctionPhysics(depth + 1, poly, bounds, 1, 0);
-				return;
-			}
-
-			// We should never get a hole
-			if (poly.IsHole())
-			{
-				// We shouldn't get this
-				Log.Error("Got a top-level polygon hole");
-				return;
-			}
-
-			// Create a physics object from this point
-			junctionBodies.Add(State.Physics.AddImmobile(poly));
-		}
-
-		/// <summary>
-		/// Splits apart a polygon into a quad and processes it for physics.
-		/// </summary>
-		private void AddJunctionPhysics(
-			int depth,
-			IPoly poly, RectangleF bounds,
-			int row, int col)
-		{
-			// Figure out the desired size and shape
-			SizeF size = new SizeF(bounds.Width / 2, bounds.Height / 2);
-			PointF point = new PointF(
-				bounds.X + col * bounds.Width / 2,
-				bounds.Y + row * bounds.Height / 2);
-			RectangleF rect = new RectangleF(point, size);
-
-			// Create the GPC polygon and calculate the intersection
-			IPoly rectangle = CreateRectangle(rect);
-			IPoly intersection = rectangle.Intersection(poly);
-
-			// Process this one
-			AddJunctionPhysics(depth, intersection, rect);
-		}
-
-		/// <summary>
-		/// Constructs a rectangle shape for GPC from the given
-		/// bounds.
-		/// </summary>
-		private IPoly CreateRectangle(RectangleF bounds)
-		{
-			IPoly rectangle = new PolyDefault();
-			rectangle.Add(bounds.Left, bounds.Top);
-			rectangle.Add(bounds.Right, bounds.Top);
-			rectangle.Add(bounds.Right, bounds.Bottom);
-			rectangle.Add(bounds.Left, bounds.Bottom);
-			return rectangle;
 		}
 
 		/// <summary>

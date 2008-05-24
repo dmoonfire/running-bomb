@@ -81,25 +81,8 @@ namespace MfGames.RunningBomb
 		/// <summary>
 		/// Adds a polygon as an immobile block.
 		/// </summary>
-		public Body AddImmobile(IPoly poly)
+		public Body AddImmobile(IShape shape)
 		{
-			// Create a polygon shape as vectors
-			LinkedList<Vector2D> vectors = new LinkedList<Vector2D>();
-
-			for (int i = 0; i < poly.PointCount; i++)
-			{
-				// Get the coordinates
-				float x = (float) poly.GetX(i);
-				float y = (float) poly.GetY(i);
-
-				// Create the vector
-				vectors.Add(new Vector2D(x, y));
-			}
-
-			// Convert it into a physics2d polygon shape
-			Vector2D [] array = vectors.ToArray();
-			IShape shape = new PolygonShape(array, 1f);
-
 			// Create the object
 			Body body = new Body(
 				new PhysicsState(),

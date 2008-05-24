@@ -18,7 +18,6 @@ namespace RunningBomb
 		private Player pp;
 
 		#region Drawing and Rendering
-		private Matrix2x3 matrix;
 		private PointF playerPoint;
 
 		/// <summary>
@@ -28,14 +27,6 @@ namespace RunningBomb
 		{
 			// Adjust for the player's angle
 			playerPoint = State.Player.Point;
-
-			// Figure out the rotation around the player
-			Matrix2x3 translate1 = Matrix2x3.FromTranslate2D(
-				new Vector2D(-playerPoint.X, -playerPoint.Y));
-			Matrix2x3 rotate = Matrix2x3.FromRotationZ(-State.Player.Angle);
-
-			// Set the matrix
-			matrix = rotate * translate1;
 		}
 
         /// <summary>
