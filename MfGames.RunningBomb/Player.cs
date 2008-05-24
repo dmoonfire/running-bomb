@@ -10,8 +10,7 @@ namespace MfGames.RunningBomb
 	{
 		public Player()
 		{
-			// Create our shape
-			
+			// Create our shape			
 		}
 	}
 }

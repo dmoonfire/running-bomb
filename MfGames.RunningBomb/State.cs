@@ -14,10 +14,6 @@ namespace MfGames.RunningBomb
 			player = new Player();
 			score = new Score();
 			junctionManager = new JunctionManager();
-
-			// Set up the physics
-			physics = new Physics();
-			physics.Add(player);
 		}
 		#endregion
 
@@ -41,6 +37,7 @@ namespace MfGames.RunningBomb
 		public static Physics Physics
 		{
 			get { return physics; }
+			set { physics = value; }
 		}
 
 		/// <summary>

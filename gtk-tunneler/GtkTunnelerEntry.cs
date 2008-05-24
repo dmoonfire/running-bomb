@@ -1,4 +1,5 @@
 using Gtk;
+using MfGames.RunningBomb;
 
 namespace MfGames.RunningBomb.GtkTunneler
 {
@@ -14,6 +15,7 @@ namespace MfGames.RunningBomb.GtkTunneler
 		{
 			// Start up Gtk
 			Application.Init();
+			Junction.GeneratePhysics = false;
 
 			// This appliation only uses a single window interface
 			GtkTunnelerFrame frame = new GtkTunnelerFrame();

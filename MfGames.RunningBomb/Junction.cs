@@ -39,6 +39,15 @@ namespace MfGames.RunningBomb
 		}
 		#endregion
 
+		#region Static Controls
+		/// <summary>
+		/// For applications that don't need physics data, set this
+		/// static property to false and physics data will not be
+		/// generated automatically.
+		/// </summary>
+		public static bool GeneratePhysics = true;
+		#endregion
+
 		#region Random Generation
 		private int randomSeed;
 		private MersenneRandom random;
@@ -218,6 +227,18 @@ namespace MfGames.RunningBomb
 		/// </summary>
 		public void BuildConnections()
 		{
+			lock (this)
+			{
+				BuildConnectionsLocked();
+			}
+		}
+
+		/// <summary>
+		/// The internal version of the building that functions while
+		/// thread-safe.
+		/// </summary>
+		private void BuildConnectionsLocked()
+		{
 			// Don't bother if we have connections already
 			if (builtConnections)
 				return;
@@ -301,17 +322,20 @@ namespace MfGames.RunningBomb
 			}
 
 			// Create the physics shapes
+			if (GeneratePhysics)
+			{
 #if DEBUG
-			Stopwatch stopwatch = Stopwatch.StartNew();
+				Stopwatch stopwatch = Stopwatch.StartNew();
 #endif
-			BuildCombinedShape();
-			CreateJunctionPhysics(0);
-
+				BuildCombinedShape();
+				CreateJunctionPhysics(0);
+				
 #if DEBUG
-			// Show timing information
-			stopwatch.Stop();
-			Log.Debug("Physics Creation: {0}", stopwatch.Elapsed);
+				// Show timing information
+				stopwatch.Stop();
+				Log.Debug("Physics Creation: {0}", stopwatch.Elapsed);
 #endif
+			}
 
 			// We are done
 			builtConnections = true;

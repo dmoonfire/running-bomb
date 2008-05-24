@@ -63,6 +63,10 @@ namespace MfGames.RunningBomb
 		{
 			get
 			{
+				// If we are zero, there is no one
+				if (Distance <= 0)
+					return 0;
+
 				// If we are past the player safe distance, we only
 				// have those killed by the player.
 				if (Distance >= Constants.PlayerSafeDistance)
@@ -73,9 +77,20 @@ namespace MfGames.RunningBomb
 				if (Distance >= Constants.BombSafeDistance)
 					return Constants.StartingPopulation - PopulationKilled - 1;
 
+				// Figure out our constants
+				double safe = Constants.BombSafeDistance;
+				double rate = Constants.PopulationSavingRate;
+				double completed = Distance / safe;
+				double t0 = Math.Tan(-rate / 2);
+				double tX = -2 * t0;
+				
+				// Figure out the number of people saved
+				double saved =
+					(Math.Tan(rate * (completed - 0.5)) - t0) / tX;
+				saved *= Constants.StartingPopulation;
+
 				// Otherwise, it is a formula based on distance
-				return (long) Math.Max(0,
-					Math.Pow(Distance, 2) - PopulationKilled);
+				return (long) saved;
 			}
 		}
 

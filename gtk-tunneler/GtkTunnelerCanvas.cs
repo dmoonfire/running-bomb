@@ -38,15 +38,17 @@ namespace MfGames.RunningBomb.GtkTunneler
 			ButtonReleaseEvent += OnButtonRelease;
 			MotionNotifyEvent += OnMotionNotify;
 
-			// Create the root node with a random seed
+			// Create the root node with a random seed. We also set
+			// the JunctionManage which triggers the update threads
+			// and set it for the user.
 			rootJunction = new Junction();
-			selectedJunction = rootJunction;
+			junctionManager.Junction = rootJunction;
 		}
 		#endregion
 
 		#region Properties
+		private JunctionManager junctionManager = new JunctionManager();
 		private Junction rootJunction;
-		private Junction selectedJunction;
 		#endregion
 
 		#region Drawing
@@ -120,11 +122,11 @@ namespace MfGames.RunningBomb.GtkTunneler
 
 				// Draw all the junctions
 				junctionHandles.Clear();
-				RenderJunction(g, selectedJunction, PointF.Empty, 1);
+				RenderJunction(g, junctionManager.Junction, PointF.Empty, 1);
 
 				// Set up the score object
 				Score score = new Score();
-				score.Distance = selectedJunction.Distance;
+				score.Distance = junctionManager.Junction.Distance;
 
 				// Draw out the current distance
 				g.SetFontSize(12 / scale);
@@ -158,7 +160,7 @@ namespace MfGames.RunningBomb.GtkTunneler
 		public void Rebuild()
 		{
 			rootJunction = new Junction();
-			selectedJunction = rootJunction;
+			junctionManager.Junction = rootJunction;
 			QueueDraw();
 		}
 
@@ -167,7 +169,7 @@ namespace MfGames.RunningBomb.GtkTunneler
 		/// </summary>
 		public void Reload()
 		{
-			selectedJunction = rootJunction;
+			junctionManager.Junction = rootJunction;
 			rootJunction.Reset();
 			QueueDraw();
 		}
@@ -208,7 +210,7 @@ namespace MfGames.RunningBomb.GtkTunneler
 						g,
 					s.ChildJunctionPoint,
 						s.ChildJunction
-						== selectedJunction.ParentJunction,
+						== junctionManager.Junction.ParentJunction,
 						s.ChildJunction == hoverJunction);
 
 					// Save the point
@@ -367,7 +369,7 @@ namespace MfGames.RunningBomb.GtkTunneler
 		{
 			// See if we have a hover
 			if (hoverJunction != null)
-				selectedJunction = hoverJunction;
+				junctionManager.Junction = hoverJunction;
 				
 			// Force a redraw
 			QueueDraw();

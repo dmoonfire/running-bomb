@@ -179,6 +179,7 @@ namespace RunningBomb
 		{
 			// Update it
 			State.Physics.Update(args);
+			State.JunctionManager.Update(args);
 
 			// Call the parent
 			return base.Update(args);

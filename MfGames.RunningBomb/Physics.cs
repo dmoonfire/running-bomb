@@ -9,6 +9,7 @@ using Physics2DDotNet.PhysicsLogics;
 using Physics2DDotNet.Shapes;
 using Physics2DDotNet.Solvers;
 using System;
+using System.Drawing;
 using Vector2D = AdvanceMath.Vector2D;
 
 namespace MfGames.RunningBomb
@@ -68,14 +69,29 @@ namespace MfGames.RunningBomb
 		#endregion
 
 		#region List Operations
+		private LinkedList<Mobile> mobiles = new LinkedList<Mobile>();
+
+		/// <summary>
+		/// Contains a list of mobiles within the physics engine.
+		/// </summary>
+		public IList<Mobile> Mobiles
+		{
+			get { return mobiles; }
+		}
+
 		/// <summary>
 		/// Adds a mobile object into the physics world.
 		/// </summary>
 		public void Add(Mobile mobile)
 		{
+			// See if we already have it
+			if (mobile == null || mobiles.Contains(mobile))
+				return;
+
 			// Add this mobile to the engine
 			Log.Debug("Adding mobile: {0}", mobile);
 			engine.AddBody(mobile.PhysicsBody);
+			mobiles.Add(mobile);
 		}
 
 		/// <summary>
@@ -95,6 +111,33 @@ namespace MfGames.RunningBomb
 			// Add it and return the results
 			engine.AddBody(body);
 			return body;
+		}
+
+		/// <summary>
+		/// Retrieves all mobiles within a certain distance of the
+		/// given point.
+		/// </summary>
+		public IList<Mobile> GetMobiles(PointF point, float distance)
+		{
+			// Go through the mobiles and find what's within range
+			LinkedList<Mobile> list = new LinkedList<Mobile>();
+
+			foreach (Mobile m in mobiles)
+			{
+				if (Geometry.CalculateDistance(point, m.Point) <= distance)
+					list.Add(m);
+			}
+
+			// Return the results
+			return list;
+		}
+
+		/// <summary>
+		/// Removes the mobile from the internal management list.
+		/// </summary>
+		public void Remove(Mobile mobile)
+		{
+			mobiles.Remove(mobile);
 		}
 		#endregion
 

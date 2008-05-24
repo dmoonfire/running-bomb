@@ -17,6 +17,7 @@ mfgames_runningbomb_FILES =  \
 	MfGames.RunningBomb/State.cs \
 	MfGames.RunningBomb/Junction.cs \
 	MfGames.RunningBomb/JunctionManager.cs \
+	MfGames.RunningBomb/JunctionManagerPreload.cs \
 	MfGames.RunningBomb/IJunctionFactory.cs \
 	MfGames.RunningBomb/RadialJunctionFactory.cs \
 	MfGames.RunningBomb/SimpleJunctionFactory.cs \

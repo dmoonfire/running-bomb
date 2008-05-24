@@ -69,18 +69,13 @@ namespace MfGames.RunningBomb
 			}
 		}
 
-		/*
-                        //create the box state, centering the x-axis on screen
-
-                        boxShape = 
-                        //create 64x64 rectangle (sq) with grid spacing at 2
-
-                        boxCoff = new Coefficients(0.5f, 0.4f, 0.4f);
-                        //might require tuning to your liking...
-
-                        boxLife = new Lifespan();
-                        //forever and ever
-						*/
+		/// <summary>
+		/// Clearws out the physics body.
+		/// </summary>
+		public void ClearPhysicsBody()
+		{
+			physicsBody = null;
+		}
 		#endregion
 
 		#region Logging
