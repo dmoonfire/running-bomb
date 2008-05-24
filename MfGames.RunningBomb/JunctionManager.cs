@@ -43,7 +43,7 @@ namespace MfGames.RunningBomb
 					return;
 
 				// Add ourselves to the physics
-				AddJunctionPhysics();
+				AddJunctionPhysics(0);
 			}
 		}
 		#endregion
@@ -62,19 +62,19 @@ namespace MfGames.RunningBomb
 		/// <summary>
 		/// Adds a junction data to the physics layer.
 		/// </summary>
-		private void AddJunctionPhysics()
+		private void AddJunctionPhysics(int depth)
 		{
 			// Create the initial junction, then create a box slightly
 			// larger than it and XOR the results to get an inverse
 			// shape (i.e. with the hole being where the players go).
-			IPoly shape = junction.Shape;
+			IPoly shape = junction.Shape.Duplicate();
 			RectangleF bounds = shape.Bounds;
 			bounds.Inflate(10, 10);
 			IPoly rectangle = CreateRectangle(bounds);
 			IPoly inverse = shape.Xor(rectangle);
 
 			// Recursively process and add the junctions
-			AddJunctionPhysics(inverse, bounds);
+			AddJunctionPhysics(depth, inverse, bounds);
 
 			// Make some noise
 			Log.Info("Adding {0} junction physic blocks", junctionBodies.Count);
@@ -85,21 +85,35 @@ namespace MfGames.RunningBomb
 		/// single polygon element that could be added to the physics
 		/// layer without any holes or additional physics.
 		/// </summary>
-		private void AddJunctionPhysics(IPoly poly, RectangleF bounds)
+		private void AddJunctionPhysics(
+			int depth, IPoly poly, RectangleF bounds)
 		{
 			// Ignore empty polygons
 			if (poly.InnerPolygonCount == 0)
 				return;
 
+			// See if we are a solid polygon
+			double areaDifference = bounds.Width * bounds.Height - poly.Area;
+
+			if (poly.InnerPolygonCount == 1 &&
+				poly.PointCount == 4 &&
+				areaDifference <= 0.1f)
+			{
+				// We appear to be at least mostly solid, drop it
+				return;
+			}
+
 			// If we have more than one polygon, split it
-			if (poly.InnerPolygonCount > 1)
+			if (poly.InnerPolygonCount > 1 ||
+				bounds.Width > Constants.MaximumJunctionPhysicsBlock ||
+				bounds.Height > Constants.MaximumJunctionPhysicsBlock)
 			{
 				// We split the polygon into quads and process each
 				// one to add it recursively.
-				AddJunctionPhysics(poly, bounds, 0, 0);
-				AddJunctionPhysics(poly, bounds, 0, 1);
-				AddJunctionPhysics(poly, bounds, 1, 1);
-				AddJunctionPhysics(poly, bounds, 1, 0);
+				AddJunctionPhysics(depth + 1, poly, bounds, 0, 0);
+				AddJunctionPhysics(depth + 1, poly, bounds, 0, 1);
+				AddJunctionPhysics(depth + 1, poly, bounds, 1, 1);
+				AddJunctionPhysics(depth + 1, poly, bounds, 1, 0);
 				return;
 			}
 
@@ -119,22 +133,23 @@ namespace MfGames.RunningBomb
 		/// Splits apart a polygon into a quad and processes it for physics.
 		/// </summary>
 		private void AddJunctionPhysics(
+			int depth,
 			IPoly poly, RectangleF bounds,
 			int row, int col)
 		{
 			// Figure out the desired size and shape
 			SizeF size = new SizeF(bounds.Width / 2, bounds.Height / 2);
 			PointF point = new PointF(
-				col * bounds.Width / 2,
-				row * bounds.Height / 2);
-			RectangleF rectangle = new RectangleF(point, size);
+				bounds.X + col * bounds.Width / 2,
+				bounds.Y + row * bounds.Height / 2);
+			RectangleF rect = new RectangleF(point, size);
 
 			// Create the GPC polygon and calculate the intersection
-			IPoly rectangleShape = CreateRectangle(rectangle);
-			IPoly intersection = poly.Intersection(rectangleShape);
+			IPoly rectangle = CreateRectangle(rect);
+			IPoly intersection = rectangle.Intersection(poly);
 
 			// Process this one
-			AddJunctionPhysics(intersection, rectangle);
+			AddJunctionPhysics(depth, intersection, rect);
 		}
 
 		/// <summary>
@@ -143,7 +158,7 @@ namespace MfGames.RunningBomb
 		/// </summary>
 		private IPoly CreateRectangle(RectangleF bounds)
 		{
-			IPoly rectangle = new PolySimple();
+			IPoly rectangle = new PolyDefault();
 			rectangle.Add(bounds.Left, bounds.Top);
 			rectangle.Add(bounds.Right, bounds.Top);
 			rectangle.Add(bounds.Right, bounds.Bottom);

@@ -18,7 +18,7 @@ namespace RunningBomb
 		{
 			// Set up a new score object, junction and everything
 			State.Initialize();
-			//State.JunctionManager.Junction = new Junction();
+			State.JunctionManager.Junction = new Junction();
 
 			// Set up the view state
 			ViewState.Scale = 1;

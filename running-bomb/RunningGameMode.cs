@@ -42,26 +42,26 @@ namespace RunningBomb
         {
 			float s = (float) args.SecondsSinceLastUpdate * 100;
             
-            if (Core.InputManager.IsActivated(InputTokens.A))
+            if (Core.InputManager.IsActivated(InputTokens.NumPad4))
 				State.Player.PhysicsBody.State.Velocity.Angular += s / 100;
-            if (Core.InputManager.IsActivated(InputTokens.S))
+            if (Core.InputManager.IsActivated(InputTokens.NumPad6))
 				State.Player.PhysicsBody.State.Velocity.Angular -= s / 100;
 
-            if (Core.InputManager.IsActivated(InputTokens.Right))
+            if (Core.InputManager.IsActivated(InputTokens.NumPad9))
 				Apply(s, 3);
-            if (Core.InputManager.IsActivated(InputTokens.Left))
+            if (Core.InputManager.IsActivated(InputTokens.NumPad7))
 				Apply(s, 1);
-            if (Core.InputManager.IsActivated(InputTokens.Up))
+            if (Core.InputManager.IsActivated(InputTokens.NumPad8))
 				Apply(s, 4);
-            if (Core.InputManager.IsActivated(InputTokens.Down))
+            if (Core.InputManager.IsActivated(InputTokens.NumPad5))
 				Apply(s, 2);
 
-			if (Core.InputManager.IsActivated(InputTokens.O))
-				ViewState.Scale += s / 100;
 			if (Core.InputManager.IsActivated(InputTokens.P))
+				ViewState.Scale += s / 100;
+			if (Core.InputManager.IsActivated(InputTokens.O))
 				ViewState.Scale -= s / 100;
 
-			if (Core.InputManager.IsActivated(InputTokens.Enter))
+			if (Core.InputManager.IsActivated(InputTokens.NumPad0))
 			{
 				State.Player.PhysicsBody.State.Velocity.Angular = 0;
 				State.Player.PhysicsBody.State.Velocity.Linear.X = 0;

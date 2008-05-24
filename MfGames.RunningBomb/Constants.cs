@@ -80,7 +80,7 @@ namespace MfGames.RunningBomb
 		/// Determines the maximum height or width a physics block can
 		/// be before it is processed as a junction.
 		/// </summary>
-		public const float MaximumJunctionPhysicsBlock = 2000;
+		public const float MaximumJunctionPhysicsBlock = 200;
 		#endregion
 	}
 }

@@ -104,7 +104,7 @@ namespace MfGames.RunningBomb
 			Body body = new Body(
 				new PhysicsState(),
 				shape,
-				10,
+				Single.PositiveInfinity,
 				new Coefficients(0.75f, 0.5f),
 				new Lifespan());
 			body.IsCollidable = true;
