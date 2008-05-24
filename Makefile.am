@@ -57,6 +57,7 @@ runningbomb_FILES =  \
 	running-bomb/DisplayUniverseAbstractMode.cs \
 	running-bomb/RunningGameMode.cs \
 	running-bomb/ViewState.cs \
+	running-bomb/EndOfGameMode.cs \
 	running-bomb/RunningBombEntry.cs
 
 # Generic

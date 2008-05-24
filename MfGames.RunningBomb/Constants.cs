@@ -94,6 +94,11 @@ namespace MfGames.RunningBomb
 		/// be before it is processed as a junction.
 		/// </summary>
 		public const float MaximumJunctionPhysicsBlock = 200;
+
+		/// <summary>
+		/// The number of seconds left in the countdown.
+		/// </summary>
+		public const float StartingCountdown = 10;
 		#endregion
 	}
 }

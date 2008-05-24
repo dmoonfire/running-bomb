@@ -3,6 +3,7 @@ using BooGame;
 using MfGames.Input;
 using MfGames.RunningBomb;
 using MfGames.Sprite3;
+using MfGames.Sprite3.BooWorks;
 using System;
 
 namespace RunningBomb
@@ -14,6 +15,29 @@ namespace RunningBomb
 	public class RunningGameMode
 	: DisplayUniverseAbstractMode
 	{
+		#region Game Mode Changes
+		/// <summary>
+		/// The game mode is now the top-most game mode.
+		/// </summary>
+		public override void OnFocused()
+		{
+			// Listen to the score
+			State.Score.OutOfTime += OnExplosion;
+		}
+
+		/// <summary>
+		/// This method is called when the game mode is no longer the
+		/// top-most one, either by another game pushing it on the
+		/// mode or it being removed. Any changes to the game stack
+		/// will be done before this is called.
+		/// </summary>
+		public override void OnUnfocused()
+		{
+			// Stop listening to the score
+			State.Score.OutOfTime -= OnExplosion;
+		}
+		#endregion
+
 		/// <summary>
 		/// Triggered when the user presses a key or mouse button.
 		/// </summary>
@@ -68,6 +92,9 @@ namespace RunningBomb
 				State.Player.PhysicsBody.State.Velocity.Linear.Y = 0;
 			}
 
+			// Update the timer
+			State.Score.Update(args);
+
 			// Call the parent
 			return base.Update(args);
         }
@@ -82,5 +109,16 @@ namespace RunningBomb
 			State.Player.PhysicsBody.State.Velocity.Linear.X += cos;
 			State.Player.PhysicsBody.State.Velocity.Linear.Y += sin;
 		}
+
+		#region Events
+		/// <summary>
+		/// This is triggered when the countdown ends.
+		/// </summary>
+		private void OnExplosion(object sender, EventArgs args)
+		{
+			// Remove ourselves from the list
+			GameModeManager.Push(new EndOfGameMode());
+		}
+		#endregion
 	}
 }

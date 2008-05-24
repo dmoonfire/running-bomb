@@ -15,8 +15,6 @@ namespace RunningBomb
 	public abstract class DisplayUniverseAbstractMode
 	: HudAbstractMode
 	{
-		private Player pp;
-
 		#region Drawing and Rendering
 		private PointF playerPoint;
 
@@ -39,26 +37,14 @@ namespace RunningBomb
 			// Set up the matrix
 			AdjustMatrix();
 
-			// Figure out the coordinates for the player
-			RenderPlayer(State.Player);
-
-			// Add a second player
-			if (pp == null)
-			{
-				State.Player.PhysicsBody.Collided += OnBodyCollided;
-				pp = new Player();
-				pp.Point = new PointF(50, 50);
-				pp.PhysicsBody.Collided += OnBodyCollided;
-				pp.PhysicsBody.IsCollidable = true;
-				State.Physics.Add(pp);
-			}
-
-			RenderPlayer(pp);
-
 			// If we need it, draw the outline of the physics object
 #if DEBUG
 			RenderJunctions();
 #endif
+
+			// Render all the mobiles
+			foreach (Mobile m in State.Physics.Mobiles)
+				Render(m);
 		}
 
 		/// <summary>
@@ -109,27 +95,10 @@ namespace RunningBomb
 			}
 		}
 
-		private void RenderPlayer(Player player)
+		private void Render(Mobile mobile)
 		{
-			RenderPolygon((PolygonShape) player.PhysicsBody.Shape,
-				player.PhysicsBody.Matrices.ToWorld);
-			/*
-			// Get some of the values we need
-			PointF p = player.Point;
-			Color color = Color.Red;
-
-			// Get the starting points
-			PointF p1 = ToScalePoint(p.X - 20, p.Y - 20, player.Angle);
-			PointF p2 = ToScalePoint(p.X - 20, p.Y + 20, player.Angle);
-			PointF p3 = ToScalePoint(p.X + 20, p.Y + 20, player.Angle);
-			PointF p4 = ToScalePoint(p.X + 20, p.Y - 20, player.Angle);
-
-			// Draw some lines
-			Paint.Line(p1.X, p1.Y, p2.X, p2.Y, color);
-			Paint.Line(p2.X, p2.Y, p3.X, p3.Y, color);
-			Paint.Line(p3.X, p3.Y, p4.X, p4.Y, color);
-			Paint.Line(p4.X, p4.Y, p1.X, p1.Y, Color.Yellow);
-			*/
+			RenderPolygon((PolygonShape) mobile.PhysicsBody.Shape,
+				mobile.PhysicsBody.Matrices.ToWorld);
 		}
 
 		/// <summary>

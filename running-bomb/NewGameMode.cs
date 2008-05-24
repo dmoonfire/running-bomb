@@ -20,6 +20,7 @@ namespace RunningBomb
 			State.Initialize();
 			State.JunctionManager.Junction = new Junction();
 			State.Physics.Add(State.Player);
+			State.Score.Countdown = Constants.StartingCountdown;
 
 			// Set up the view state
 			ViewState.Scale = 1;

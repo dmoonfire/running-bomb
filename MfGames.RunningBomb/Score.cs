@@ -1,3 +1,4 @@
+using MfGames.Sprite3;
 using System;
 
 namespace MfGames.RunningBomb
@@ -11,6 +12,53 @@ namespace MfGames.RunningBomb
 		#region Properties
 		private double distance;
 		private long killed;
+		private float countdown;
+		private float countdownMultiplier = 1;
+		private bool isCountingDown = true;
+
+		/// <summary>
+		/// Contains the number of seconds left in the countdown.
+		/// </summary>
+		public float Countdown
+		{
+			get { return countdown; }
+			set { countdown = value; }
+		}
+
+		public string CountdownString
+		{
+			get
+			{
+				// Pull out the minutes
+				float time = countdown;
+				int minutes = (int) (countdown / 60);
+				time -= minutes * 60;
+
+				// Format the seconds to 4 digits
+				string seconds = time.ToString("F4");
+
+				if (seconds.Length < 7)
+					seconds = "0" + seconds;
+
+				// Return the results
+				return String.Format("{0}:{1}", minutes, seconds);
+			}
+		}
+
+		/// <summary>
+		/// Contains the modifier to the countdown speed.
+		/// </summary>
+		public float CountdownMultiplier
+		{
+			get { return countdownMultiplier; }
+			set
+			{
+				if (value <= 0)
+					return;
+
+				countdownMultiplier = value;
+			}
+		}
 
 		/// <summary>
 		/// Contains the distance in distance that the shape has
@@ -26,6 +74,15 @@ namespace MfGames.RunningBomb
 
 				distance = value;
 			}
+		}
+
+		/// <summary>
+		/// If this is true, then the score object will process the
+		/// update code.
+		/// </summary>
+		public bool IsCountingDown
+		{
+			get { return isCountingDown; }
 		}
 
 		/// <summary>
@@ -120,6 +177,37 @@ namespace MfGames.RunningBomb
 			get
 			{
 				return 1;
+			}
+		}
+		#endregion
+
+		#region Updating
+		public event EventHandler OutOfTime;
+
+		/// <summary>
+		/// Updates elements in the score object that are
+		/// time-dependent.
+		/// </summary>
+		public void Update(UpdateArgs args)
+		{
+			// Don't bother if we aren't active
+			if (!isCountingDown)
+				return;
+
+			// Calculate the amount of time remaining
+			double seconds = args.SecondsSinceLastUpdate * countdownMultiplier;
+			countdown -= (float) seconds;
+
+			// If we are less than zero, boom.
+			if (countdown < 0)
+			{
+				// Reset it to make it pretty
+				countdown = 0;
+				isCountingDown = false;
+
+				// Fire the event to anyone listening
+				if (OutOfTime != null)
+					OutOfTime(this, EventArgs.Empty);
 			}
 		}
 		#endregion

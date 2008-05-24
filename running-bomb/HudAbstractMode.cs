@@ -16,13 +16,14 @@ namespace RunningBomb
 	: NullGameMode
 	{
 		#region Constants
-		private const float FontSize = 24;
+		private const float FontSize = 36;
 		#endregion
 
 		#region Constructors
 		protected HudAbstractMode()
 		{
-			font = new FreeTypeFont("DejaVuSansMono-Bold.ttf", FontSize);
+			//font = new FreeTypeFont("DejaVuSansMono-Bold.ttf", FontSize);
+			font = new FreeTypeFont("MoonfireArray.ttf", FontSize);
 		}
 		#endregion
 
@@ -64,6 +65,11 @@ namespace RunningBomb
 					State.Player.PhysicsBody.State.Velocity.Linear.Y,
 					State.Player.PhysicsBody.State.Velocity.Angular),
 				Color.White, 10, 10 + FontSize * 1,
+				ContentAlignment.TopLeft);
+
+			// Format the time
+		    font.Print("Countdown: " + State.Score.CountdownString,
+				Color.White, 10, 10 + FontSize * 2,
 				ContentAlignment.TopLeft);
 		}
 
