@@ -15,6 +15,14 @@ namespace MfGames.RunningBomb
 	{
 		#region Properties
 		/// <summary>
+		/// Returns the angle of the mobile.
+		/// </summary>
+		public float Angle
+		{
+			get { return PhysicsBody.State.Position.Angular; }
+		}
+
+		/// <summary>
 		/// Contains the relative point of this mobile to the root
 		/// junction.
 		/// </summary>

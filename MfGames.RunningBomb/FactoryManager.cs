@@ -26,7 +26,7 @@ namespace MfGames.RunningBomb
 		/// will always return the same segment.
 		/// </summary>
 		public static ISegmentFactory ChooseSegmentFactory(
-			JunctionNode childJunction)
+			Junction childJunction)
 		{
 			return new SimpleSegmentFactory();
 		}

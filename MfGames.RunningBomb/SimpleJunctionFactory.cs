@@ -16,7 +16,7 @@ namespace MfGames.RunningBomb
 		/// Constructs the junction node's shape and sets internal
 		/// structures to match the new shape.
 		/// </summary>
-		public void Create(JunctionNode junction)
+		public void Create(Junction junction)
 		{
 			// We always start with one shape
 			IPoly shape = Geometry.CreateShape(junction, PointF.Empty,

@@ -10,6 +10,6 @@ namespace MfGames.RunningBomb
 		/// Constructs the junction node's shape and sets internal
 		/// structures to match the new shape.
 		/// </summary>
-		void Create(JunctionNode junction);
+		void Create(Junction junction);
 	}
 }

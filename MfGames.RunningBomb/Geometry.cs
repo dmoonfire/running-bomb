@@ -58,7 +58,7 @@ namespace MfGames.RunningBomb
 		/// is the requirement).
 		/// </summary>
 		public static IPoly CreateShape(
-			JunctionNode parent,
+			Junction parent,
 			PointF point,
 			float radius)
 		{

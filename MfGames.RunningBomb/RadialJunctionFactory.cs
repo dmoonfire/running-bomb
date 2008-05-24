@@ -17,7 +17,7 @@ namespace MfGames.RunningBomb
 		/// Constructs the junction node's shape and sets internal
 		/// structures to match the new shape.
 		/// </summary>
-		public void Create(JunctionNode junction)
+		public void Create(Junction junction)
 		{
 			// Figure out the basic points by creating an array
 			// radials, which is determined by the random number generator.

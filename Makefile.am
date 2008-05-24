@@ -15,7 +15,8 @@ mfgames_runningbomb_FILES =  \
 	MfGames.RunningBomb/Mobile.cs \
 	MfGames.RunningBomb/Player.cs \
 	MfGames.RunningBomb/State.cs \
-	MfGames.RunningBomb/JunctionNode.cs \
+	MfGames.RunningBomb/Junction.cs \
+	MfGames.RunningBomb/JunctionManager.cs \
 	MfGames.RunningBomb/IJunctionFactory.cs \
 	MfGames.RunningBomb/RadialJunctionFactory.cs \
 	MfGames.RunningBomb/SimpleJunctionFactory.cs \
@@ -54,6 +55,7 @@ runningbomb_FILES =  \
 	running-bomb/HudAbstractMode.cs \
 	running-bomb/DisplayUniverseAbstractMode.cs \
 	running-bomb/RunningGameMode.cs \
+	running-bomb/ViewState.cs \
 	running-bomb/RunningBombEntry.cs
 
 # Generic

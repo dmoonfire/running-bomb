@@ -11,7 +11,7 @@ namespace MfGames.RunningBomb
 	/// where there is potentially a special situation and where the
 	/// tunnel system branches out.
 	/// </summary>
-	public class JunctionNode
+	public class Junction
 	{
 		#region Constructors
 		/// <summary>
@@ -19,7 +19,7 @@ namespace MfGames.RunningBomb
 		/// number generator, this should only be done for the initial
 		/// node.
 		/// </summary>
-		public JunctionNode()
+		public Junction()
 		: this(Entropy.Next())
 		{
 		}
@@ -27,7 +27,7 @@ namespace MfGames.RunningBomb
 		/// <summary>
 		/// Constructs the junction node with a given seed.
 		/// </summary>
-		public JunctionNode(int seed)
+		public Junction(int seed)
 		{
 			randomSeed = seed;
 			random = new MersenneRandom(seed);
@@ -43,7 +43,7 @@ namespace MfGames.RunningBomb
 		/// be null, otherwise it will contain the junction node that
 		/// generated this node.
 		/// </summary>
-		public JunctionNode ParentJunctionNode;
+		public Junction ParentJunction;
 
 		/// <summary>
 		/// This is the random number generator used for this junction
@@ -67,6 +67,7 @@ namespace MfGames.RunningBomb
 
 			// Purge the stored data
 			internalShape = null;
+			shape = null;
 			segments.Clear();
 
 			// Reset the random value
@@ -76,7 +77,7 @@ namespace MfGames.RunningBomb
 
 		#region Geometry
 		private bool builtShape = false;
-		private IPoly internalShape;
+		private IPoly internalShape, shape;
 		private double distance;
 
 		/// <summary>
@@ -107,6 +108,35 @@ namespace MfGames.RunningBomb
 			{
 				internalShape = value;
 				builtShape = true;
+			}
+		}
+
+		/// <summary>
+		/// The returned polygon is the shape of the junction plus all
+		/// child junctions and segments.
+		/// </summary>
+		public IPoly Shape
+		{
+			get
+			{
+				// See if we already have it
+				if (shape != null)
+					return shape;
+
+				// Get the internal shape (this builds the internal)
+				shape = InternalShape;
+
+				// Add all the segments (this builds segments)
+				foreach (Segment s in Segments)
+				{
+					// Add the segment
+					shape = shape.Union(s.InternalShape);
+					shape = shape.Union(s.ChildJunction.InternalShape.Translate(
+							s.ChildJunctionPoint.X, s.ChildJunctionPoint.Y));
+				}
+
+				// Return the results
+				return shape;
 			}
 		}
 
@@ -160,10 +190,10 @@ namespace MfGames.RunningBomb
 			LinkedList<IPoly> overlaps = new LinkedList<IPoly>();
 
 			// Process the parent element
-			if (ParentJunctionNode != null)
+			if (ParentJunction != null)
 			{
 				// Find our input segment
-				Segment ps = ParentJunctionNode.GetSegment(this);
+				Segment ps = ParentJunction.GetSegment(this);
 
 				if (ps == null)
 					throw new Exception("We got a null segment from parent");
@@ -197,21 +227,21 @@ namespace MfGames.RunningBomb
 					(float) Math.Sin(angle) * length);
 
 				// Create a new junction at this point
-				JunctionNode junction = new JunctionNode(Random.Next());
-				junction.ParentJunctionNode = this;
+				Junction junction = new Junction(Random.Next());
+				junction.ParentJunction = this;
 				junction.BuildShapes();
 
 				// Get the segment factory and create the segment
 				ISegmentFactory isf =
 					FactoryManager.ChooseSegmentFactory(junction);
 				Segment segment = isf.Create(junction, point);
-				segment.ParentJunctionNode = this;
-				segment.ChildJunctionNode = junction;
+				segment.ParentJunction = this;
+				segment.ChildJunction = junction;
 				segment.ChildJunctionPoint = point;
 
 				// Set the junction's distance
 				junction.Distance =
-					Distance + 10 * segment.CenterPoints.MaximumRelativeDistance;
+					Distance + segment.CenterPoints.MaximumRelativeDistance;
 
 				// Check and add the overlap
 				if (CheckOverlapIntersection(overlaps, segment))
@@ -232,10 +262,10 @@ namespace MfGames.RunningBomb
 		/// <summary>
 		/// Retrieves a segment based on the child junction.
 		/// </summary>
-		public Segment GetSegment(JunctionNode junction)
+		public Segment GetSegment(Junction junction)
 		{
 			foreach (Segment s in segments)
-				if (s.ChildJunctionNode == junction)
+				if (s.ChildJunction == junction)
 					return s;
 
 			return null;
@@ -248,7 +278,7 @@ namespace MfGames.RunningBomb
 			IList<IPoly> overlaps, Segment segment)
 		{
 			// First build up the overlap test shape
-			IPoly newShape = segment.ChildJunctionNode.InternalShape
+			IPoly newShape = segment.ChildJunction.InternalShape
 				.Translate(
 					segment.ChildJunctionPoint.X,
 					segment.ChildJunctionPoint.Y)

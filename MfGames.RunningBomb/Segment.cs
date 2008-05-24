@@ -13,12 +13,12 @@ namespace MfGames.RunningBomb
 	public class Segment
 	{
 		#region Junctions
-		private JunctionNode parent, child;
+		private Junction parent, child;
 
 		/// <summary>
 		/// Sets the child junction node for this segment.
 		/// </summary>
-		public JunctionNode ChildJunctionNode
+		public Junction ChildJunction
 		{
 			get { return child; }
 			set
@@ -39,7 +39,7 @@ namespace MfGames.RunningBomb
 		/// <summary>
 		/// Sets the parent junction node for this segment.
 		/// </summary>
-		public JunctionNode ParentJunctionNode
+		public Junction ParentJunction
 		{
 			get { return parent; }
 			set
@@ -52,7 +52,7 @@ namespace MfGames.RunningBomb
 		}
 		#endregion
 
-		#region Nodes
+		#region Junctions
 		private IPoly internalShape;
 		private CenterPointList centerPoints = new CenterPointList();
 

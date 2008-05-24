@@ -19,15 +19,15 @@ namespace MfGames.RunningBomb
 		/// <summary>
 		/// Creates a segment from a child junction to its parent.
 		/// </summary>
-		public Segment Create(JunctionNode childNode, PointF childPoint)
+		public Segment Create(Junction child, PointF childPoint)
 		{
 			// Sanity checking
-			if (childNode.ParentJunctionNode == null)
+			if (child.ParentJunction == null)
 				throw new Exception("Cannot generate with a null parent");
 
 			// Get the distance between the two points
 			Segment segment = new Segment();
-			JunctionNode parentNode = childNode.ParentJunctionNode;
+			Junction parent = child.ParentJunction;
 
 			// Add the two end points
 			CenterPointList points = new CenterPointList();
@@ -40,7 +40,7 @@ namespace MfGames.RunningBomb
 #endif
 
 			// Stagger (fractalize) the points
-			Geometry.StaggerPoints(points, parentNode.Random,
+			Geometry.StaggerPoints(points, parent.Random,
 				Constants.MinimumSegmentDistance,
 				Constants.StaggerSegmentPasses);
 
@@ -66,7 +66,7 @@ namespace MfGames.RunningBomb
 				while (true)
 				{
 					// Create a shape
-					IPoly p = Geometry.CreateShape(parentNode, point.Point,
+					IPoly p = Geometry.CreateShape(parent, point.Point,
 						retry * Constants.SegmentAverageWidth);
 
 					// If we have no shape, this is automatically
@@ -105,8 +105,8 @@ namespace MfGames.RunningBomb
 			}
 
 			// Remove both junction shapes from this
-			//shape = shape.Difference(parentNode.InternalShape);
-			//shape = shape.Difference(childNode.InternalShape);
+			//shape = shape.Difference(parent.InternalShape);
+			//shape = shape.Difference(child.InternalShape);
 
 #if DEBUG
 			// Show timing information

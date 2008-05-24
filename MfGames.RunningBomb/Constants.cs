@@ -75,6 +75,12 @@ namespace MfGames.RunningBomb
 		/// safe distance.
 		/// </summary>
 		public const double PlayerSafeDistance = 2 * BombSafeDistance;
+
+		/// <summary>
+		/// Determines the maximum height or width a physics block can
+		/// be before it is processed as a junction.
+		/// </summary>
+		public const float MaximumJunctionPhysicsBlock = 2000;
 		#endregion
 	}
 }

@@ -39,14 +39,14 @@ namespace MfGames.RunningBomb.GtkTunneler
 			MotionNotifyEvent += OnMotionNotify;
 
 			// Create the root node with a random seed
-			rootJunctionNode = new JunctionNode();
-			selectedJunctionNode = rootJunctionNode;
+			rootJunction = new Junction();
+			selectedJunction = rootJunction;
 		}
 		#endregion
 
 		#region Properties
-		private JunctionNode rootJunctionNode;
-		private JunctionNode selectedJunctionNode;
+		private Junction rootJunction;
+		private Junction selectedJunction;
 		#endregion
 
 		#region Drawing
@@ -120,11 +120,11 @@ namespace MfGames.RunningBomb.GtkTunneler
 
 				// Draw all the junctions
 				junctionHandles.Clear();
-				RenderJunction(g, selectedJunctionNode, PointF.Empty, 1);
+				RenderJunction(g, selectedJunction, PointF.Empty, 1);
 
 				// Set up the score object
 				Score score = new Score();
-				score.Distance = selectedJunctionNode.Distance;
+				score.Distance = selectedJunction.Distance;
 
 				// Draw out the current distance
 				g.SetFontSize(12 / scale);
@@ -157,8 +157,8 @@ namespace MfGames.RunningBomb.GtkTunneler
 		/// </summary>
 		public void Rebuild()
 		{
-			rootJunctionNode = new JunctionNode();
-			selectedJunctionNode = rootJunctionNode;
+			rootJunction = new Junction();
+			selectedJunction = rootJunction;
 			QueueDraw();
 		}
 
@@ -167,8 +167,8 @@ namespace MfGames.RunningBomb.GtkTunneler
 		/// </summary>
 		public void Reload()
 		{
-			selectedJunctionNode = rootJunctionNode;
-			rootJunctionNode.Reset();
+			selectedJunction = rootJunction;
+			rootJunction.Reset();
 			QueueDraw();
 		}
 
@@ -176,7 +176,7 @@ namespace MfGames.RunningBomb.GtkTunneler
 		/// Renders out a single junction to the canvas.
 		/// </summary>
 		private void RenderJunction(
-			Context g, JunctionNode junction, 
+			Context g, Junction junction, 
 			PointF point,
 			int recursion)
 		{
@@ -192,7 +192,7 @@ namespace MfGames.RunningBomb.GtkTunneler
 				{
 					// Render the junction
 					RenderJunction(g,
-						s.ChildJunctionNode,
+						s.ChildJunction,
 						s.ChildJunctionPoint,
 						recursion);
 				}
@@ -207,9 +207,9 @@ namespace MfGames.RunningBomb.GtkTunneler
 					RenderJunctionHandle(
 						g,
 					s.ChildJunctionPoint,
-						s.ChildJunctionNode
-						== selectedJunctionNode.ParentJunctionNode,
-						s.ChildJunctionNode == hoverJunctionNode);
+						s.ChildJunction
+						== selectedJunction.ParentJunction,
+						s.ChildJunction == hoverJunction);
 
 					// Save the point
 					junctionHandles.Add(s);
@@ -358,7 +358,7 @@ namespace MfGames.RunningBomb.GtkTunneler
 		#region Mouse Movement
 		private LinkedList<Segment> junctionHandles =
 			new LinkedList<Segment>();
-		private JunctionNode hoverJunctionNode;
+		private Junction hoverJunction;
 
 		/// <summary>
 		/// Triggered when the button is released (lifted).
@@ -366,8 +366,8 @@ namespace MfGames.RunningBomb.GtkTunneler
 		public void OnButtonRelease(object sender, ButtonReleaseEventArgs args)
 		{
 			// See if we have a hover
-			if (hoverJunctionNode != null)
-				selectedJunctionNode = hoverJunctionNode;
+			if (hoverJunction != null)
+				selectedJunction = hoverJunction;
 				
 			// Force a redraw
 			QueueDraw();
@@ -400,19 +400,19 @@ namespace MfGames.RunningBomb.GtkTunneler
 			y = y / scale - cy;
 
 			// Go through the list and see if we are near a handle
-			hoverJunctionNode = null;
+			hoverJunction = null;
 
 			foreach (Segment s in junctionHandles)
 			{
 				// Get the point, swapping it if needed
-				JunctionNode jn = s.ChildJunctionNode;
+				Junction jn = s.ChildJunction;
 				PointF p = s.ChildJunctionPoint;
 
 				// See if we are in range
 				if (p.X - hs <= x && x <= p.X + hs &&
 					p.Y - hs <= y && y <= p.Y + hs)
 				{
-					hoverJunctionNode = jn;
+					hoverJunction = jn;
 					break;
 				}
 			}

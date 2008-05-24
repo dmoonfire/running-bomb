@@ -13,6 +13,7 @@ namespace MfGames.RunningBomb
 			// Set up the game
 			player = new Player();
 			score = new Score();
+			junctionManager = new JunctionManager();
 
 			// Set up the physics
 			physics = new Physics();
@@ -24,6 +25,15 @@ namespace MfGames.RunningBomb
 		private static Score score;
 		private static Player player;
 		private static Physics physics;
+		private static JunctionManager junctionManager;
+
+		/// <summary>
+		/// Contains the junction manager for this game.
+		/// </summary>
+		public static JunctionManager JunctionManager
+		{
+			get { return junctionManager; }
+		}
 
 		/// <summary>
 		/// Contains the physics engine used.
