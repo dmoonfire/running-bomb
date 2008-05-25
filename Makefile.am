@@ -66,6 +66,7 @@ runningbomb_FILES =  \
 	running-bomb/Themes/ThemeContext.cs \
 	running-bomb/Themes/ThemeLayout.cs \
 	running-bomb/Themes/ThemeSingle.cs \
+	running-bomb/Themes/ThemeColor.cs \
 	running-bomb/Themes/ThemeViewport.cs \
 	running-bomb/Themes/ThemeString.cs \
 	running-bomb/Themes/IThemeCommand.cs \

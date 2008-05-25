@@ -96,6 +96,23 @@ namespace MfGames.RunningBomb
 		private double distance;
 
 		/// <summary>
+		/// Retrieves a list of all center points in this junction and
+		/// all segments.
+		/// </summary>
+		public IList<CenterPoint> CenterPoints
+		{
+			get
+			{
+				LinkedList<CenterPoint> list = new LinkedList<CenterPoint>();
+
+				foreach (Segment s in Segments)
+					list.AddAll(s.CenterPoints);
+
+				return list;
+			}
+		}
+
+		/// <summary>
 		/// Contains the distance of the center of the junction node
 		/// from its parent.
 		/// </summary>
@@ -199,6 +216,74 @@ namespace MfGames.RunningBomb
 				Log.Debug("Created shape 2: {0} inner {1} points",
 					shape.InnerPolygonCount, shape.PointCount);
 			}
+		}
+
+		/// <summary>
+		/// Calculates the world distance from a given relative point
+		/// in the junction.
+		/// </summary>
+		public double CalculateDistance(PointF point)
+		{
+			// We keep track of the five best points in terms of
+			// distance from the desired point and calculated length
+			// from before.
+			float [] fromPoint = new float [] {
+				Single.PositiveInfinity,
+				Single.PositiveInfinity,
+				Single.PositiveInfinity,
+				Single.PositiveInfinity,
+				Single.PositiveInfinity };
+			double [] fromCenter = new double [] {
+				Double.PositiveInfinity,
+				Double.PositiveInfinity,
+				Double.PositiveInfinity,
+				Double.PositiveInfinity,
+				Double.PositiveInfinity };
+
+			// Go through the center points
+			foreach (CenterPoint cp in CenterPoints)
+			{
+				// Get the distance from the point
+				float from = Geometry.CalculateDistance(point, cp.Point);
+
+				if (from < fromPoint[0])
+				{
+					// Shift everything down
+					for (int i = 4; i > 0; i--)
+					{
+						fromPoint[i - 1] = fromPoint[i];
+						fromCenter[i - 1] = fromCenter[i];
+					}
+
+					// Add it
+					fromPoint[0] = from;
+					fromCenter[0] = cp.RelativeDistance;
+				}
+			}
+
+			// When we get through all this, we have the five closest
+			// points to the given point which should ensure that at
+			// least one of them is closer to the center for an
+			// accurate distance. The closer ones might be in "front"
+			// of the point, but then the distance would incorrectly
+			// add.
+			double bestCenter = fromCenter[0];
+			float bestFrom = fromPoint[0];
+
+			for (int i = 1; i < 5; i++)
+			{
+				if (bestCenter > fromCenter[i])
+				{
+					bestCenter = fromCenter[i];
+					bestFrom = fromPoint[i];
+				}
+			}
+
+			// At this point, we have the point that is lowest from
+			// the center of the junction but the closest to the
+			// point, so just add the two distances (from point and
+			// from center) and return the results.
+			return bestFrom + bestCenter + this.Distance;
 		}
 		#endregion
 

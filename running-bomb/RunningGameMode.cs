@@ -21,8 +21,6 @@ namespace RunningBomb
 		/// </summary>
 		public override void OnFocused()
 		{
-			// Listen to the score
-			State.Score.OutOfTime += OnExplosion;
 		}
 
 		/// <summary>
@@ -33,10 +31,11 @@ namespace RunningBomb
 		/// </summary>
 		public override void OnUnfocused()
 		{
-			// Stop listening to the score
-			State.Score.OutOfTime -= OnExplosion;
 		}
 		#endregion
+
+		private bool isCountingDown = true;
+		private bool ignoreFirstUpdate = true;
 
 		/// <summary>
 		/// Triggered when the user presses a key or mouse button.
@@ -93,11 +92,47 @@ namespace RunningBomb
 			}
 
 			// Update the timer
-			State.Score.Update(args);
+			UpdateTimer(args);
+
+			// Update the distance
+			State.Score.Distance = State.JunctionManager.Junction
+				.CalculateDistance(State.Player.Point);
 
 			// Call the parent
 			return base.Update(args);
         }
+
+		private void UpdateTimer(UpdateArgs args)
+		{
+			// Don't bother if we aren't active
+			if (!isCountingDown)
+				return;
+
+			// See if we should ignore the first one
+			if (ignoreFirstUpdate)
+			{
+				// We use this to prevent the update from giving a
+				// large one at once.
+				ignoreFirstUpdate = false;
+				return;
+			}
+
+			// Calculate the amount of time remaining
+			double seconds =
+				args.SecondsSinceLastUpdate * State.Score.CountdownMultiplier;
+			State.Score.Countdown -= (float) seconds;
+
+			// If we are less than zero, boom.
+			if (State.Score.Countdown < 0)
+			{
+				// Reset it to make it pretty
+				State.Score.Countdown = 0;
+				isCountingDown = false;
+
+				// Start up the end of game mode on top of us
+				GameModeManager.Push(new EndOfGameMode());
+			}
+		}
 
 		private void Apply(float force, float count)
 		{
@@ -109,16 +144,5 @@ namespace RunningBomb
 			State.Player.PhysicsBody.State.Velocity.Linear.X += cos;
 			State.Player.PhysicsBody.State.Velocity.Linear.Y += sin;
 		}
-
-		#region Events
-		/// <summary>
-		/// This is triggered when the countdown ends.
-		/// </summary>
-		private void OnExplosion(object sender, EventArgs args)
-		{
-			// Remove ourselves from the list
-			GameModeManager.Push(new EndOfGameMode());
-		}
-		#endregion
 	}
 }

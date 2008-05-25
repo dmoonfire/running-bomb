@@ -14,8 +14,6 @@ namespace MfGames.RunningBomb
 		private long killed;
 		private float countdown;
 		private float countdownMultiplier = 1;
-		private bool isCountingDown = true;
-		private bool ignoreFirstUpdate = true;
 
 		/// <summary>
 		/// Contains the number of seconds left in the countdown.
@@ -23,11 +21,7 @@ namespace MfGames.RunningBomb
 		public float Countdown
 		{
 			get { return countdown; }
-			set
-			{
-				ignoreFirstUpdate = true;
-				countdown = value; 
-			}
+			set { countdown = value; }
 		}
 
 		public string CountdownString
@@ -79,15 +73,6 @@ namespace MfGames.RunningBomb
 
 				distance = value;
 			}
-		}
-
-		/// <summary>
-		/// If this is true, then the score object will process the
-		/// update code.
-		/// </summary>
-		public bool IsCountingDown
-		{
-			get { return isCountingDown; }
 		}
 
 		/// <summary>
@@ -182,46 +167,6 @@ namespace MfGames.RunningBomb
 			get
 			{
 				return 1;
-			}
-		}
-		#endregion
-
-		#region Updating
-		public event EventHandler OutOfTime;
-
-		/// <summary>
-		/// Updates elements in the score object that are
-		/// time-dependent.
-		/// </summary>
-		public void Update(UpdateArgs args)
-		{
-			// Don't bother if we aren't active
-			if (!isCountingDown)
-				return;
-
-			// See if we should ignore the first one
-			if (ignoreFirstUpdate)
-			{
-				// We use this to prevent the update from giving a
-				// large one at once.
-				ignoreFirstUpdate = false;
-				return;
-			}
-
-			// Calculate the amount of time remaining
-			double seconds = args.SecondsSinceLastUpdate * countdownMultiplier;
-			countdown -= (float) seconds;
-
-			// If we are less than zero, boom.
-			if (countdown < 0)
-			{
-				// Reset it to make it pretty
-				countdown = 0;
-				isCountingDown = false;
-
-				// Fire the event to anyone listening
-				if (OutOfTime != null)
-					OutOfTime(this, EventArgs.Empty);
 			}
 		}
 		#endregion

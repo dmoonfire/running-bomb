@@ -18,11 +18,18 @@
     <viewport
 	x="10" y="10" w="height-20" h="height-20" />
 
+    <!-- Display the Score -->
+    <string
+	font="scores"
+	x="width - 10" y="10"
+	color="#666666"
+	format="{0:z7} m"
+	variables="distance" />
     <string
 	font="scores"
 	x="width - 10" y="10"
 	color="#FFFFFF"
-	format="1,234,456 m"
+	format="{0:N0} m"
 	variables="distance" />
 
     <string
