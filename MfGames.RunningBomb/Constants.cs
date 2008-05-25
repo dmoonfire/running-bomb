@@ -98,7 +98,7 @@ namespace MfGames.RunningBomb
 		/// <summary>
 		/// The number of seconds left in the countdown.
 		/// </summary>
-		public const float StartingCountdown = 10;
+		public const float StartingCountdown = 300;
 		#endregion
 	}
 }

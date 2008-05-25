@@ -15,6 +15,7 @@ namespace MfGames.RunningBomb
 		private float countdown;
 		private float countdownMultiplier = 1;
 		private bool isCountingDown = true;
+		private bool ignoreFirstUpdate = true;
 
 		/// <summary>
 		/// Contains the number of seconds left in the countdown.
@@ -22,7 +23,11 @@ namespace MfGames.RunningBomb
 		public float Countdown
 		{
 			get { return countdown; }
-			set { countdown = value; }
+			set
+			{
+				ignoreFirstUpdate = true;
+				countdown = value; 
+			}
 		}
 
 		public string CountdownString
@@ -193,6 +198,15 @@ namespace MfGames.RunningBomb
 			// Don't bother if we aren't active
 			if (!isCountingDown)
 				return;
+
+			// See if we should ignore the first one
+			if (ignoreFirstUpdate)
+			{
+				// We use this to prevent the update from giving a
+				// large one at once.
+				ignoreFirstUpdate = false;
+				return;
+			}
 
 			// Calculate the amount of time remaining
 			double seconds = args.SecondsSinceLastUpdate * countdownMultiplier;

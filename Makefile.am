@@ -58,6 +58,17 @@ runningbomb_FILES =  \
 	running-bomb/RunningGameMode.cs \
 	running-bomb/ViewState.cs \
 	running-bomb/EndOfGameMode.cs \
+	running-bomb/TestThemeGameMode.cs \
+	running-bomb/Themes/ThemeManager.cs \
+	running-bomb/Themes/Theme.cs \
+	running-bomb/Themes/ThemeFont.cs \
+	running-bomb/Themes/IThemeCallback.cs \
+	running-bomb/Themes/ThemeContext.cs \
+	running-bomb/Themes/ThemeLayout.cs \
+	running-bomb/Themes/ThemeSingle.cs \
+	running-bomb/Themes/ThemeViewport.cs \
+	running-bomb/Themes/ThemeString.cs \
+	running-bomb/Themes/IThemeCommand.cs \
 	running-bomb/RunningBombEntry.cs
 
 # Generic

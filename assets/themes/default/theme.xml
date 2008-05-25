@@ -1,0 +1,35 @@
+<theme>
+  <name>Default</name>
+
+  <fonts>
+    <font id="scores"
+	  size="36"
+	  align="TopRight"
+	  file="MoonfireArray.ttf"/>
+  </fonts>
+
+  <!--
+      Display layout is the main game layout for the actual game and the
+      final entry stuff. It should have the distance (at minimum) and
+      other information.
+  -->
+
+  <layout id="display">
+    <viewport
+	x="10" y="10" w="height-20" h="height-20" />
+
+    <string
+	font="scores"
+	x="width - 10" y="10"
+	color="#FFFFFF"
+	format="1,234,456 m"
+	variables="distance" />
+
+    <string
+	font="scores"
+	x="width - 10" y="46"
+	color="#FFFFFF"
+	format="{0} s"
+	variables="countdown" />
+  </layout>
+</theme>

@@ -17,25 +17,22 @@ namespace RunningBomb
 	{
 		#region Drawing and Rendering
 		private PointF playerPoint;
-
-		/// <summary>
-		/// Creates the transformation matrix used by the rendering.
-		/// </summary>
-		private void AdjustMatrix()
-		{
-			// Adjust for the player's angle
-			playerPoint = State.Player.Point;
-		}
+		private PointF screenPoint;
 
         /// <summary>
 		/// Renders the universe currently loaded into the screen,
 		/// then passes the rendering for the HUD to overlay it.
         /// </summary>
         /// <param name="args"></param>
-        protected override void DrawViewport(DrawingArgs args)
-		{	
-			// Set up the matrix
-			AdjustMatrix();
+        public override void DrawViewport(
+			DrawingArgs args, RectangleF bounds)
+		{
+			// Set the player point
+			screenPoint.X = bounds.X + bounds.Width / 2;
+			screenPoint.Y = bounds.Y + 3 * bounds.Height / 4;
+
+			// Adjust for the player's angle
+			playerPoint = State.Player.Point;
 
 			// If we need it, draw the outline of the physics object
 #if DEBUG
@@ -91,7 +88,12 @@ namespace RunningBomb
 				PointF p1 = ToPoint(v1.X, v1.Y);
 				PointF p2 = ToPoint(v2.X, v2.Y);
 				
-				Paint.Line(p1.X, p1.Y, p2.X, p2.Y, Color.Gray);
+				Color color = Color.Gray;
+
+				if (State.Score.Countdown == 0)
+					color = Color.Red;
+
+				Paint.Line(p1.X, p1.Y, p2.X, p2.Y, color);
 			}
 		}
 
@@ -132,8 +134,8 @@ namespace RunningBomb
 			y *= ViewState.Scale;
 
 			// Adjust for the center of the screen
-			x += PlayerPoint.X;
-			y += PlayerPoint.Y;
+			x += screenPoint.X;
+			y += screenPoint.Y;
 
 			// Return the results
 			return new PointF(x, y);

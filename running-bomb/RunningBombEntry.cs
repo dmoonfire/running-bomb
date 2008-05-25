@@ -17,7 +17,8 @@ namespace RunningBomb
 		{
 			// Set up the works infrastructure
 			BooWorksManager bwm = new BooWorksManager();
-			bwm.Run(ConfigFile, new NewGameMode());
+			bwm.Run(ConfigFile, new TestThemeGameMode());
+			//bwm.Run(ConfigFile, new NewGameMode());
 		}
 
 		#region Configuration
