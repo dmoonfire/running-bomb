@@ -65,10 +65,8 @@ namespace RunningBomb
 			playerPoint = State.Player.Point;
 
 			// If we need it, draw the outline of the physics object
-#if DEBUG
 			//RenderJunctions();
-#endif
-			RenderJunctionShape(bounds);
+			RenderJunctionShape();
 
 			// Render all the mobiles
 			foreach (Mobile m in State.Physics.Mobiles)
@@ -176,39 +174,13 @@ namespace RunningBomb
 		#region Junction Rendering
 		private LinkedList<PointF> renderPoints =
 			new LinkedList<PointF>();
+		private int junctionDisplayList = -1;
 
 		/// <summary>
 		/// Renders out the junction shape to the screen.
 		/// </summary>
-		private void RenderJunctionShape(RectangleF bounds)
+		private void CreateJunctionShape()
 		{
-			// Create a new polygon intersection of the screen bounds
-			PolyDefault screenRect = new PolyDefault();
-			screenRect.Add(-bounds.Width, -bounds.Height);
-			screenRect.Add(-bounds.Width,  bounds.Height);
-			screenRect.Add( bounds.Width,  bounds.Height);
-			screenRect.Add( bounds.Width, -bounds.Height);
-
-			// Go through the internal shape and convert it to world coordinates
-			IPoly shape = State.JunctionManager.Junction.Shape;
-			IPoly shape0 = new PolyDefault();
-
-			for (int i = 0; i < shape.PointCount; i++)
-			{
-				// Calculate the point
-				PointF p0 =	ToPoint(
-					(float) shape.GetX(i), (float) shape.GetY(i));
-				shape0.Add(p0);
-			}
-
-			IPoly poly = screenRect.Intersection(shape0);
-
-			if (poly.PointCount == 0)
-			{
-				Log.Error("None!");
-				poly = shape0;
-			}
-
 			// Create the AGG tesselator and set it up
 			Tesselator tess = new Tesselator();
 			tess.callCombine += OnTesselatorCombine;
@@ -216,14 +188,10 @@ namespace RunningBomb
 			tess.callMesh += OnMesh;
 			tess.callBegin += OnTesselatorBegin;
 			tess.callEnd += OnTesselatorEnd;
-
-			// OpenGL setup
-            Gl.glPushMatrix();
-            Gl.glDisable(Gl.GL_TEXTURE_2D);
-            BooGame.Camera.ApplyMatrix();
-			Gl.glColor4f(0.25f, 0.25f, 0.25f, 1);
-
+			
 			// Go through the junction's internal shape
+			IPoly poly = State.JunctionManager.Junction.Shape;
+
 			renderPoints.Clear();
 			tess.BeginPolygon();
 			tess.BeginContour();
@@ -249,10 +217,25 @@ namespace RunningBomb
 			//Log.Info("Tesselating {0} points", renderPoints.Count);
 			tess.EndContour();
 			tess.EndPolygon();
+		}
 
-			// Finish up OpenGl
-            Gl.glEnable(Gl.GL_TEXTURE_2D);
-            Gl.glPopMatrix();
+		/// <summary>
+		/// Triggered when the junction changes.
+		/// </summary>
+		private void OnJunctionChanged(object sender, EventArgs args)
+		{
+			// Noise
+			Log.Debug("Building up junction display list");
+
+			// Release any old list
+			if (junctionDisplayList >= 0)
+				Gl.glDeleteLists(junctionDisplayList, 1);
+
+			// Create a display list of the entire junction
+			junctionDisplayList = Gl.glGenLists(1);
+			Gl.glNewList(junctionDisplayList, Gl.GL_COMPILE);
+			CreateJunctionShape();
+			Gl.glEndList();
 		}
 
 		/// <summary>
@@ -296,6 +279,31 @@ namespace RunningBomb
 			// Adjust the point for the current view
 			PointF p = renderPoints[data];
 
+			// Figure out the color
+			double ratio =
+				State.JunctionManager.Junction.CalculateDistance(p) /
+				Constants.BombSafeDistance;
+
+			if (ratio >= 1)
+			{
+				// Just set it to gray
+				Gl.glColor4f(0.25f, 0.25f, 0.25f, 1);
+			}
+			else
+			{
+				// Just fade the red channel the entire way
+				float r = (float) (1 - ratio * 0.75);
+
+				// Set up the green channel
+				float g = (float) (1 - ratio * 0.65);
+
+				// Have the blue channel build up, then drop down
+				float b = (float) (0.25 + 1 - Math.Abs(0.5 - ratio));
+
+				// Set the color
+				Gl.glColor4f(r, g, b, 1);
+			}
+
 			// Render the vertex
 			Gl.glVertex2f(p.X, p.Y);
 		}
@@ -314,6 +322,36 @@ namespace RunningBomb
 		{
 			//Log.Debug("  mesh!");
 		}
+
+		/// <summary>
+		/// Calls the display list to render out the junction shape.
+		/// </summary>
+		private void RenderJunctionShape()
+		{
+			// Set up the basic rendering
+            Gl.glPushMatrix();
+            Gl.glDisable(Gl.GL_TEXTURE_2D);
+            BooGame.Camera.ApplyMatrix();
+
+			// Center on the player
+			PointF p = State.Player.Point;
+			float scale = ViewState.Scale;
+
+			// DREM - No, I have no clue how all this works, I just
+			// randomly selected things until it started to work properly.
+			Gl.glTranslatef(screenPoint.X, screenPoint.Y, 0);
+			Gl.glScalef(scale, -scale, -1);
+			Gl.glRotatef(90 - State.Player.Angle * Constants.RadiansToDegrees,
+				0f, 0f, 1f);
+			Gl.glTranslatef(-p.X, -p.Y, 0);
+
+			// Call the list
+			Gl.glCallList(junctionDisplayList);
+
+			// Finish up
+            Gl.glEnable(Gl.GL_TEXTURE_2D);
+            Gl.glPopMatrix();
+		}
 		#endregion
 
 		#region Updating
@@ -328,31 +366,6 @@ namespace RunningBomb
 
 			// Call the parent
 			return base.Update(args);
-		}
-		#endregion
-
-		#region Display Lists
-		private junctionDisplayList = -1;
-
-		/// <summary>
-		/// Triggered when the junction changes.
-		/// </summary>
-		private void OnJunctionChanged(object sender, EventArgs args)
-		{
-			// Noise
-			Log.Debug("Building up junction display list");
-
-			// Release any old list
-			if (junctionDisplayList >= 0)
-			{
-				Gl.glDeleteList(junctionDisplayList);
-			}
-			// Create a display list of the entire junction
-			junctionDisplayList = Gl.glGenLists(1);
-			Gl.glNewList(junctionDisplayList, Gl.GL_COMPILE);
-
-			// Finish up the list
-			Gl.glEndList();
 		}
 		#endregion
 	}
