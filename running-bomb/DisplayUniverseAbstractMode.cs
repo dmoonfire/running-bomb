@@ -19,6 +19,32 @@ namespace RunningBomb
 	public abstract class DisplayUniverseAbstractMode
 	: HudAbstractMode
 	{
+		#region Game Mode Changes
+		/// <summary>
+		/// The game mode is now the top-most game mode.
+		/// </summary>
+		public override void OnFocused()
+		{
+			// Set up some events
+			base.OnFocused();
+			State.JunctionManager.JunctionChanged += OnJunctionChanged;
+			OnJunctionChanged(this, EventArgs.Empty);
+		}
+
+		/// <summary>
+		/// This method is called when the game mode is no longer the
+		/// top-most one, either by another game pushing it on the
+		/// mode or it being removed. Any changes to the game stack
+		/// will be done before this is called.
+		/// </summary>
+		public override void OnUnfocused()
+		{
+			// Clean up our events
+			base.OnUnfocused();
+			State.JunctionManager.JunctionChanged -= OnJunctionChanged;
+		}
+		#endregion
+
 		#region Drawing and Rendering
 		private PointF playerPoint;
 		private PointF screenPoint;
@@ -148,32 +174,40 @@ namespace RunningBomb
 		#endregion
 
 		#region Junction Rendering
-		private LinkedList<PointF> renderPoints = new LinkedList<PointF>();
+		private LinkedList<PointF> renderPoints =
+			new LinkedList<PointF>();
 
 		/// <summary>
 		/// Renders out the junction shape to the screen.
 		/// </summary>
 		private void RenderJunctionShape(RectangleF bounds)
 		{
-			// Create a new polygon intersection
-			PointF pp = State.Player.Point;
-			PointF p1 = ToPoint(pp.X - bounds.Width, pp.Y - bounds.Height);
-			PointF p2 = ToPoint(pp.X + bounds.Width, pp.Y + bounds.Height);
-			IPoly screenRect = Geometry.CreateRectangle(
-				new RectangleF(p1, new SizeF(p2.X - p1.X, p2.Y - p1.Y)));
+			// Create a new polygon intersection of the screen bounds
+			PolyDefault screenRect = new PolyDefault();
+			screenRect.Add(-bounds.Width, -bounds.Height);
+			screenRect.Add(-bounds.Width,  bounds.Height);
+			screenRect.Add( bounds.Width,  bounds.Height);
+			screenRect.Add( bounds.Width, -bounds.Height);
 
-			// Go through the internal shape
+			// Go through the internal shape and convert it to world coordinates
 			IPoly shape = State.JunctionManager.Junction.Shape;
 			IPoly shape0 = new PolyDefault();
 
 			for (int i = 0; i < shape.PointCount; i++)
 			{
-				PointF p0 =
-					ToPoint((float) shape.GetX(i), (float) shape.GetY(i));
+				// Calculate the point
+				PointF p0 =	ToPoint(
+					(float) shape.GetX(i), (float) shape.GetY(i));
 				shape0.Add(p0);
 			}
 
 			IPoly poly = screenRect.Intersection(shape0);
+
+			if (poly.PointCount == 0)
+			{
+				Log.Error("None!");
+				poly = shape0;
+			}
 
 			// Create the AGG tesselator and set it up
 			Tesselator tess = new Tesselator();
@@ -187,6 +221,7 @@ namespace RunningBomb
             Gl.glPushMatrix();
             Gl.glDisable(Gl.GL_TEXTURE_2D);
             BooGame.Camera.ApplyMatrix();
+			Gl.glColor4f(0.25f, 0.25f, 0.25f, 1);
 
 			// Go through the junction's internal shape
 			renderPoints.Clear();
@@ -195,14 +230,17 @@ namespace RunningBomb
 
 			for (int i = 0; i < poly.PointCount; i++)
 			{
-				// Get the point
+ 				// Get the point
 				PointF p = new PointF(
 					(float) poly.GetX(i), (float) poly.GetY(i));
 					
 				// Add the vertex with the index it will have when we
 				// refer to it later.
 				tess.AddVertex(
-					new double [] { p.X, p.Y, 0 }, renderPoints.Count);
+					new double [] { p.X, p.Y, 0 },
+					renderPoints.Count);
+
+				// Create the center
 				renderPoints.Add(p);
 			}
 
@@ -258,13 +296,6 @@ namespace RunningBomb
 			// Adjust the point for the current view
 			PointF p = renderPoints[data];
 
-			// Figure out the distance from the core and use that to
-			// set the color of the vertex.
-			double distance =
-				State.JunctionManager.Junction.CalculateDistance(p);
-
-			SetColor(distance);
-
 			// Render the vertex
 			Gl.glVertex2f(p.X, p.Y);
 		}
@@ -273,7 +304,8 @@ namespace RunningBomb
 			double [] coords3, int [] data4, double[] weight4, out int outData)
 		{
 			// Create a new point and add it
-			PointF p = new PointF((float) coords3[0], (float) coords3[1]);
+			PointF p = new PointF(
+				(float) coords3[0], (float) coords3[1]);
 			outData = renderPoints.Count;
 			renderPoints.Add(p);
 		}
@@ -281,37 +313,6 @@ namespace RunningBomb
 		private void OnMesh(Mesh mesh)
 		{
 			//Log.Debug("  mesh!");
-		}
-
-		/// <summary>
-		/// Figures out the base background color for the polygon.
-		/// </summary>
-		private void SetColor(double distance)
-		{
-			// Convert this to a ratio
-			double ratio = distance / Constants.BombSafeDistance;
-			double r = 1;
-			double g = 1;
-			double b = 0.25;
-
-			// Set the red tones
-			if (ratio <= 0.25)
-				r = 1 - (3 * ratio);
-			else
-				r = 0.25;
-
-			// Set the green tones
-			if (ratio <= 0.50)
-				g = 1 - (1.5 * ratio);
-			else
-				g = 0.25;
-
-			// Set the blue tones
-			if (ratio >= 0.50)
-				b = (ratio - 0.50) / 2;
-
-			// Use the distance to figure out the color
-			Gl.glColor4f((float) r, (float) g, (float) b, 1);
 		}
 		#endregion
 
@@ -327,6 +328,31 @@ namespace RunningBomb
 
 			// Call the parent
 			return base.Update(args);
+		}
+		#endregion
+
+		#region Display Lists
+		private junctionDisplayList = -1;
+
+		/// <summary>
+		/// Triggered when the junction changes.
+		/// </summary>
+		private void OnJunctionChanged(object sender, EventArgs args)
+		{
+			// Noise
+			Log.Debug("Building up junction display list");
+
+			// Release any old list
+			if (junctionDisplayList >= 0)
+			{
+				Gl.glDeleteList(junctionDisplayList);
+			}
+			// Create a display list of the entire junction
+			junctionDisplayList = Gl.glGenLists(1);
+			Gl.glNewList(junctionDisplayList, Gl.GL_COMPILE);
+
+			// Finish up the list
+			Gl.glEndList();
 		}
 		#endregion
 	}

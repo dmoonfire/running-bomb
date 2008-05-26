@@ -366,6 +366,13 @@ namespace MfGames.RunningBomb
 				Stopwatch stopwatch = Stopwatch.StartNew();
 #endif
 				BuildCombinedShape();
+#if DEBUG
+				// Show timing information
+				stopwatch.Stop();
+				Log.Debug("   Physics Shape: {0}", stopwatch.Elapsed);
+				stopwatch.Reset();
+				stopwatch.Start();
+#endif
 				CreateJunctionPhysics(0);
 				
 #if DEBUG
@@ -522,9 +529,12 @@ namespace MfGames.RunningBomb
 				vectors.Add(new Vector2D(x, y));
 			}
 
-			// Convert it into a physics2d polygon shape
+			// Convert it into a physics2d polygon shape. Making the
+			// PolygonShape second parameter too small makes the game
+			// basically unusable in terms of stage generation but
+			// more accurate for impacts with the side.
 			Vector2D [] array = vectors.ToArray();
-			IShape ps = new PolygonShape(array, 1f);
+			IShape ps = new PolygonShape(array, 5f);
 			physicsShapes.Add(ps);
 		}
 

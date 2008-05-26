@@ -23,6 +23,7 @@ namespace RunningBomb
 		public override void OnFocused()
 		{
 			// Set up some events
+			base.OnFocused();
 			State.JunctionManager.JunctionChanged += OnJunctionChanged;
 		}
 
@@ -35,6 +36,7 @@ namespace RunningBomb
 		public override void OnUnfocused()
 		{
 			// Clean up our events
+			base.OnUnfocused();
 			State.JunctionManager.JunctionChanged -= OnJunctionChanged;
 		}
 		#endregion
