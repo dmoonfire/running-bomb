@@ -54,12 +54,16 @@ runningbomb_EXE = $(runningbomb_ASSEMBLY_NAME).exe
 runningbomb_ASSEMBLY = $(BUILD)/$(runningbomb_EXE)
 runningbomb_FILES =  \
 	running-bomb/NewGameMode.cs \
+	running-bomb/MainMenuGameMode.cs \
 	running-bomb/HudAbstractMode.cs \
 	running-bomb/DisplayUniverseAbstractMode.cs \
 	running-bomb/RunningGameMode.cs \
 	running-bomb/SpeedMeter.cs \
 	running-bomb/ViewState.cs \
 	running-bomb/EndOfGameMode.cs \
+	running-bomb/TextScrollGameMode.cs \
+	running-bomb/TextScrollLine.cs \
+	running-bomb/LineType.cs \
 	running-bomb/TestThemeGameMode.cs \
 	running-bomb/Themes/ThemeManager.cs \
 	running-bomb/Themes/Theme.cs \
@@ -84,7 +88,7 @@ runningbomb_FILES =  \
 # Generic
 all: $(mfgames_runningbomb_ASSEMBLY) $(gtk_drawer_ASSEMBLY)
 all: $(gtk_tunneler_ASSEMBLY) $(runningbomb_ASSEMBLY)
-	cp libs/*.dll libs/*.dll.config build
+	cp libs/*.dll build
 
 clean-local:
 	$(RM) -rf $(BUILD)
@@ -141,6 +145,7 @@ $(gtk_tunneler_ASSEMBLY): gtk-tunneler/ui.xml
 	chmod a+x $@
 
 $(runningbomb_ASSEMBLY): $(runningbomb_FILES) $(mfgames_runningbomb_ASSEMBLY)
+$(runningbomb_ASSEMBLY): assets/credits.txt assets/story.txt assets/help.txt
 	mkdir -p $(BUILD)
 	$(CSC) -debug $(CSC_FLAGS) -target:winexe -out:$@ \
 		-unsafe \
@@ -157,6 +162,9 @@ $(runningbomb_ASSEMBLY): $(runningbomb_FILES) $(mfgames_runningbomb_ASSEMBLY)
 		-r:libs/Physics2DDotNet.dll \
 		-r:System.Drawing \
 		-r:$(mfgames_runningbomb_ASSEMBLY) \
+		-resource:assets/story.txt,story.txt \
+		-resource:assets/credits.txt,credits.txt \
+		-resource:assets/help.txt,help.txt \
 		$(realpath $(runningbomb_FILES))
 	chmod a+x $@
 

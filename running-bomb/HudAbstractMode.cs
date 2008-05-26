@@ -26,7 +26,7 @@ namespace RunningBomb
 		{
 			// Get the theme and render using it
 			Theme theme = ThemeManager.Theme;
-			theme.Render(Theme.DisplayLayout, this, args);
+			theme.Render(Theme.UniverseLayout, this, args);
 
 			/*
 			// Display statistics

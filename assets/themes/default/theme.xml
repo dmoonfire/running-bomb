@@ -2,9 +2,45 @@
   <name>Default</name>
 
   <fonts>
+    <font id="h1" size="60" align="BottomLeft" file="MoonfireArray.ttf"/>
+    <font id="h2" size="48" align="BottomLeft" file="MoonfireArray.ttf"/>
+    <font id="h3" size="36" align="BottomLeft" file="MoonfireArray.ttf"/>
+    <font id="p"  size="24" align="BottomLeft" file="MoonfireArray.ttf"/>
+
     <font id="scores"
 	  size="36"
 	  align="TopRight"
+	  file="MoonfireArray.ttf"/>
+    <font id="smscores"
+	  size="24"
+	  align="TopRight"
+	  file="MoonfireArray.ttf"/>
+
+    <font id="menu"
+	  size="72"
+	  align="MiddleCenter"
+	  file="MoonfireArray.ttf"/>
+    <font id="smallmenu"
+	  size="48"
+	  align="MiddleCenter"
+	  file="MoonfireArray.ttf"/>
+
+    <font id="mfgames"
+	  size="48"
+	  align="MiddleCenter"
+	  file="MoonfireArray.ttf"/>
+    <font id="title"
+	  size="96"
+	  align="MiddleCenter"
+	  file="MoonfireArray.ttf"/>
+
+    <font id="end-of-game"
+	  size="108"
+	  align="MiddleCenter"
+	  file="MoonfireArray.ttf"/>
+    <font id="stats"
+	  size="72"
+	  align="MiddleCenter"
 	  file="MoonfireArray.ttf"/>
   </fonts>
 
@@ -14,7 +50,7 @@
       other information.
   -->
 
-  <layout id="display">
+  <layout id="universe">
     <viewport
 	x="10" y="10" w="height-20" h="height-20" />
 
@@ -45,5 +81,60 @@
 	color="#FFFFFF"
 	format="{0}"
 	variables="speedfmt" />
+
+    <string
+	font="scores"
+	x="width - 10" y="118"
+	color="#FFFFFF"
+	format="{0}"
+	variables="percentpopsaved" />
+    <string
+	font="smscores"
+	x="width - 10" y="154"
+	color="#FFFFFF"
+	format="{0:N0}"
+	variables="popsaved" />
+  </layout>
+
+  <layout id="text">
+    <string
+	font="scores"
+	x="width - 10" y="10"
+	color="#FFFFFF"
+	text="Up" />
+    <string
+	font="scores"
+	x="width - 10" y="46"
+	color="#FFFFFF"
+	text="Down"/>
+    <string
+	font="scores"
+	x="width - 10" y="82"
+	color="#FFFFFF"
+	text="Space"/>
+    <string
+	font="scores"
+	x="width - 10" y="118"
+	color="#FFFFFF"
+	text="Escape"/>
+
+    <viewport
+	x="10" y="10" w="height-20" h="height-20" />
+  </layout>
+
+  <layout id="title">
+    <string
+	font="mfgames"
+	x="width / 2" y="30"
+	color="#999999"
+	text="Moonfire Games presents..." />
+    <string
+	font="title"
+	x="width / 2" y="85"
+	color="#FFFFFF"
+	text="Running Bomb" />
+
+    <viewport
+	x="10" y="200" w="width-20" h="height-210" />
   </layout>
 </theme>

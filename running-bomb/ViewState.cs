@@ -7,7 +7,7 @@ namespace RunningBomb
 	/// </summary>
 	public static class ViewState
 	{
-		private static float scale = 1;
+		private static float scale = 0.1f;
 
 		/// <summary>
 		/// Contains the scale to render the various elements of the

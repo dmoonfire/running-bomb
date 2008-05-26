@@ -1,0 +1,120 @@
+=1 Credits
+
+Running Bomb was created by Dylan
+R. E. Moonfire. We could pretend that there are
+thirty or fourty lines worth of "Produced by",
+"Written by", but... well... I made it. So, we'll
+just leave it at that okay?
+
+That said, no programming happens in a vaccum and
+this game is no exception. While the bulk of the
+programming is Dylan's, there are a lot of
+libraries that went into it that are decidedly not
+Dylan's.
+
+=2 Programming Libraries
+
+Programming libraries are things that are written
+by other people so I don't have to revinent the
+wheel. And, they are the foundation of everything
+I created because I didn't have to spend three
+weeks figuring them out.
+
+=3 BooGame
+
+  http://boogame.sourceforge.net/
+
+While I am one of the developers on this project,
+the bulk of the work comes from other people,
+including Rob Loach, so I can't take credit for
+everything I use there.
+
+=3 Tao Framework
+
+  http://www.taoframework.com/
+
+The Tao Framework is a collection of CIL (or .NET
+for the non-political types) libraries which wrap
+around a large number of other graphical
+libraries. In this game, we use Tao.Sdl,
+Tao.OpenGl, and a variant of Tao.FreeType.
+
+=3 AGG-Sharp
+
+  http://agg-sharp.sourceforge.net/
+
+Whenever you deal with complicated polygons, such
+as the layouts in this game, you have to break it
+into smaller triangles to get OpenGL to reander
+it. Without AGG-Sharp's Tesselator, I would have
+never have figured it out.
+
+=3 GPC
+
+  http://www.cs.man.ac.uk/~toby/alan/software/
+  http://www.seisw.com/GPCJ/GPCJ.html
+
+GPC, a general polygon clipping library, is a
+great little package. There is a C# wrapper for
+it, but it didn't work with Mono so I took the
+Java port done by Solution Engineering, Inc. and
+converted that port to C#, changing it. Without
+understanding how it really works, I'll admit, but
+they both did a great job with that.
+
+=2 Fonts
+
+Why, oh why, do I feel the need to give credit for
+the fonts. Oh yeah, because I made it. They aren't
+the most perfect things in the world, but it was
+my first font and it fits what I needed in a font
+for this game.
+
+=3 Inkscape
+
+  http://www.inkscape.org/
+
+I created the fonts using Inkscape, which is my
+favorite of all graphical editors (I did my
+webcomic in it, actually).
+
+=3 FontForge
+
+  http://fontforge.sourceforge.net/
+
+Why did I wait so many years to create a font?
+Because, I thought it was difficult. I thought it
+would be hundreds of hours, thousands of bleeding
+fingers. Nope, about three hours. Maybe
+four. Mainly because of this program. Now, I know
+the font looks like I took four hours, but at
+least I had the Euro symbol in it and my 7's are
+crossed like they should be.
+
+=2 Inspirations
+
+There are a couple of inspirations for this
+game. Some of them aren't that important, but I
+feel that you should list at least some of them
+since nothing is ever created in the void.
+
+=3 The Independent Gaming Source
+
+  http://tigsource.com/
+  http://forums.tigsource.com/index.php?topic=1646.0
+
+This game was written as an entry into the
+Procedural Generation Competition. It was a short
+little competition, but it drove me to create
+something that was unique, fast, and more
+importantly, limited in scope.
+
+=3 Meritous
+
+  http://www.asceai.net/meritous/
+
+This little game is a honest procedurally
+generated game that caught my heart a few months
+ago and I really enjoy playing it. And, I have to
+admit, some of the things in that game have
+influenced how this game was written.

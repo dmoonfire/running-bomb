@@ -111,6 +111,17 @@ namespace MfGames.RunningBomb
 		}
 
 		/// <summary>
+		/// Contains the percentage saved, in terms of 0 to 1.
+		/// </summary>
+		public string PercentageSavedString
+		{
+			get
+			{
+				return String.Format("{0:N3} %", PercentageSaved * 100);
+			}
+		}
+
+		/// <summary>
 		/// Sets the number of people killed by actions of the player.
 		/// </summary>
 		public long PopulationKilled

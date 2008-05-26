@@ -23,7 +23,7 @@ namespace RunningBomb
 			State.Score.Countdown = Constants.StartingCountdown;
 
 			// Set up the view state
-			ViewState.Scale = 1;
+			ViewState.Scale = 0.5f;
 
 			// Switch to the running mode
 			GameModeManager.Set(new RunningGameMode());

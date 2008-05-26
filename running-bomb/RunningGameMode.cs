@@ -58,7 +58,7 @@ namespace RunningBomb
 			switch (args.Token)
             {
                 case InputTokens.Escape: // Quit
-                    Core.Exit();
+					GameModeManager.Push(new MainMenuGameMode());
                     break;
             }
 
@@ -74,23 +74,23 @@ namespace RunningBomb
         {
 			float s = (float) args.SecondsSinceLastUpdate * 100;
             
-            if (Core.InputManager.IsActivated(InputTokens.NumPad4))
+            if (Core.InputManager.IsActivated(InputTokens.NumPad7))
 				State.Player.PhysicsBody.State.Velocity.Angular += s / 100;
-            if (Core.InputManager.IsActivated(InputTokens.NumPad6))
+            if (Core.InputManager.IsActivated(InputTokens.NumPad9))
 				State.Player.PhysicsBody.State.Velocity.Angular -= s / 100;
 
-            if (Core.InputManager.IsActivated(InputTokens.NumPad9))
+            if (Core.InputManager.IsActivated(InputTokens.NumPad6))
 				Apply(s, 3);
-            if (Core.InputManager.IsActivated(InputTokens.NumPad7))
+            if (Core.InputManager.IsActivated(InputTokens.NumPad4))
 				Apply(s, 1);
             if (Core.InputManager.IsActivated(InputTokens.NumPad8))
 				Apply(s, 4);
-            if (Core.InputManager.IsActivated(InputTokens.NumPad5))
+            if (Core.InputManager.IsActivated(InputTokens.NumPad2))
 				Apply(s, 2);
 
-			if (Core.InputManager.IsActivated(InputTokens.P))
+			if (Core.InputManager.IsActivated(InputTokens.OpenBracket))
 				ViewState.Scale += s / 100;
-			if (Core.InputManager.IsActivated(InputTokens.O))
+			if (Core.InputManager.IsActivated(InputTokens.CloseBracket))
 				ViewState.Scale -= s / 100;
 
 			if (Core.InputManager.IsActivated(InputTokens.NumPad0))

@@ -44,7 +44,7 @@ namespace MfGames.RunningBomb
 		/// The smaller this number, the straighter the lines and
 		/// faster it renders.
 		/// </remarks>
-		public const float FractalDecay = 0.05f;
+		public const float FractalDecay = 0.2f;
 
 		/// <summary>
 		/// The minimum number of meters to break a segment into.
@@ -71,12 +71,12 @@ namespace MfGames.RunningBomb
 		/// Sets the starting population to one trillion and one
 		/// people.
 		/// </summary>
-		public const long StartingPopulation = 1000000000001;
+		public const long StartingPopulation = 1000000001;
 
 		/// <summary>
 		/// The safe distance is one million meters.
 		/// </summary>
-		public const double BombSafeDistance = 1000000 / 100;
+		public const double BombSafeDistance = 1000000;
 
 		/// <summary>
 		/// The rate of poulation saving.

@@ -1,0 +1,28 @@
+=1 Help
+
+What? You actually want to figure out how to play
+this game? Well, I guess that makes sense. Since
+you already got this far, you can probably figure
+out the menu: up, down, and enter (or space or
+right) to select a menu.
+
+=2 Playing the Game
+
+You have a ship. It moves around, just like you
+want it to. Use the number pad on the right to
+control your ship.
+
+  8 - Up
+  6 - Right
+  2 - Down
+  4 - Left
+  0 - Brakes - Slows you down
+
+  [ - Zoom in
+  ] - Zoom out
+
+  Escape - Quit
+
+Actually <Escape> will get you out of most screens
+in the game and to quit in a hurry, just hit
+<Escape> a few times in rapid succession.

@@ -18,7 +18,9 @@ namespace RunningBomb.Themes
 	public class Theme
 	{
 		#region Constants
-		public const string DisplayLayout = "display";
+		public const string UniverseLayout = "universe";
+		public const string TextLayout = "text";
+		public const string TitleLayout = "title";
 		#endregion
 
 		#region Properties
@@ -58,14 +60,19 @@ namespace RunningBomb.Themes
 
 			context["width"] = context.ScreenSize.Width;
 			context["height"] = context.ScreenSize.Height;
-			context["distance"] = State.Score.Distance;
-			context["countdown"] = State.Score.CountdownString;
-			context["popsaved"] = State.Score.PopulationSaved;
-			context["popkilled"] = State.Score.PopulationKilled;
-			context["speed"] = State.Score.Speed;
-			context["maxspeed"] = State.Score.MaximumSpeed;
-			context["speedfmt"] = State.Score.SpeedString;
-			context["maxspeedfmt"] = State.Score.MaximumSpeedString;
+
+			if (State.Score != null)
+			{
+				context["distance"] = State.Score.Distance;
+				context["countdown"] = State.Score.CountdownString;
+				context["popsaved"] = State.Score.PopulationSaved;
+				context["popkilled"] = State.Score.PopulationKilled;
+				context["percentpopsaved"] = State.Score.PercentageSavedString;
+				context["speed"] = State.Score.Speed;
+				context["maxspeed"] = State.Score.MaximumSpeed;
+				context["speedfmt"] = State.Score.SpeedString;
+				context["maxspeedfmt"] = State.Score.MaximumSpeedString;
+			}
 
 			// Get it
 			ThemeLayout tl = layouts[layout];
