@@ -1,6 +1,7 @@
 AUTOMAKE_OPTIONS=dist-bzip2 dist-zip
 BUILD = $(top_builddir)/build
 
+# Tesselate stolen from agg-sharp
 mfgames_runningbomb_ASSEMBLY_NAME = MfGames.RunningBomb
 mfgames_runningbomb_DLL = $(mfgames_runningbomb_ASSEMBLY_NAME).dll
 mfgames_runningbomb_ASSEMBLY = $(BUILD)/$(mfgames_runningbomb_DLL)
@@ -56,6 +57,7 @@ runningbomb_FILES =  \
 	running-bomb/HudAbstractMode.cs \
 	running-bomb/DisplayUniverseAbstractMode.cs \
 	running-bomb/RunningGameMode.cs \
+	running-bomb/SpeedMeter.cs \
 	running-bomb/ViewState.cs \
 	running-bomb/EndOfGameMode.cs \
 	running-bomb/TestThemeGameMode.cs \
@@ -70,12 +72,19 @@ runningbomb_FILES =  \
 	running-bomb/Themes/ThemeViewport.cs \
 	running-bomb/Themes/ThemeString.cs \
 	running-bomb/Themes/IThemeCommand.cs \
-	running-bomb/RunningBombEntry.cs
+	running-bomb/RunningBombEntry.cs \
+	Tesselate/ActiveRegion.cs \
+	Tesselate/ContourVertex.cs \
+	Tesselate/Dictionary.cs \
+	Tesselate/Face.cs \
+	Tesselate/HalfEdge.cs \
+	Tesselate/mesh.cs \
+	Tesselate/Tesselator.cs
 
 # Generic
 all: $(mfgames_runningbomb_ASSEMBLY) $(gtk_drawer_ASSEMBLY)
 all: $(gtk_tunneler_ASSEMBLY) $(runningbomb_ASSEMBLY)
-	cp libs/*.dll build
+	cp libs/*.dll libs/*.dll.config build
 
 clean-local:
 	$(RM) -rf $(BUILD)
@@ -134,12 +143,15 @@ $(gtk_tunneler_ASSEMBLY): gtk-tunneler/ui.xml
 $(runningbomb_ASSEMBLY): $(runningbomb_FILES) $(mfgames_runningbomb_ASSEMBLY)
 	mkdir -p $(BUILD)
 	$(CSC) -debug $(CSC_FLAGS) -target:winexe -out:$@ \
+		-unsafe \
 		/d:TRACE /d:DEBUG \
 		@boogame_LIBS@ \
 		@mfgames_input_LIBS@ \
 		@mfgames_utility_LIBS@ \
 		@mfgames_sprite3_works_LIBS@ \
+		@mfgames_sprite3_boogamebe_LIBS@ \
 		@gpc_LIBS@ \
+		@tao_opengl_LIBS@ \
 		-r:libs/C5.dll \
 		-r:libs/AdvanceMath.dll \
 		-r:libs/Physics2DDotNet.dll \

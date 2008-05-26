@@ -66,7 +66,7 @@ namespace MfGames.RunningBomb
 
 				// If we have two junctions, then we need to move
 				// stuff over between the two.
-				if (junction != null && value != null)
+				if (junction != null && value != null && State.Player != null)
 					SwitchJunctionContents(junction, value);
 
 				// Clean up the old junction loading
@@ -81,14 +81,16 @@ namespace MfGames.RunningBomb
 
 				// We are done if we are null
 				if (junction == null)
+				{
+					FireJunctionChanged();
 					return;
+				}
 
 				// Set up our new physics engine in the state
 				State.Physics = preload.Physics;
 
-				// Fire up the thread pool to process the child
-				// junctions
-				//UpdateChildJunctions();
+				// Fire the change
+				FireJunctionChanged();
 			}
 		}
 
@@ -129,6 +131,13 @@ namespace MfGames.RunningBomb
 			// player.
 			JunctionManagerPreload oldPreload = preloadedJunctions[oldJunction];
 			JunctionManagerPreload newPreload = preloadedJunctions[newJunction];
+
+			if (oldPreload == null)
+				throw new Exception("oldPreload is null");
+
+			if (newPreload == null)
+				throw new Exception("newPreload is null");
+
 			IList<Mobile> list = oldPreload.Physics.GetMobiles(
 				State.Player.Point, Constants.OverlapConnectionDistance);
 
@@ -249,6 +258,19 @@ namespace MfGames.RunningBomb
 
 			// Process the junction
 			junction.BuildConnections();
+		}
+		#endregion
+		
+		#region Events
+		public event EventHandler JunctionChanged;
+
+		/// <summary>
+		/// Fires a junction changed event to any listeners.
+		/// </summary>
+		private void FireJunctionChanged()
+		{
+			if (JunctionChanged != null)
+				JunctionChanged(this, EventArgs.Empty);
 		}
 		#endregion
 

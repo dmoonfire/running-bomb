@@ -1,11 +1,15 @@
 using AdvanceMath;
 using BooGame.Video;
+using C5;
+using Gpc;
 using MfGames.RunningBomb;
 using MfGames.Sprite3;
 using Physics2DDotNet;
 using Physics2DDotNet.Shapes;
 using System;
 using System.Drawing;
+using Tao.OpenGl;
+using Tesselate;
 
 namespace RunningBomb
 {
@@ -36,8 +40,9 @@ namespace RunningBomb
 
 			// If we need it, draw the outline of the physics object
 #if DEBUG
-			RenderJunctions();
+			//RenderJunctions();
 #endif
+			RenderJunctionShape(bounds);
 
 			// Render all the mobiles
 			foreach (Mobile m in State.Physics.Mobiles)
@@ -139,6 +144,174 @@ namespace RunningBomb
 
 			// Return the results
 			return new PointF(x, y);
+		}
+		#endregion
+
+		#region Junction Rendering
+		private LinkedList<PointF> renderPoints = new LinkedList<PointF>();
+
+		/// <summary>
+		/// Renders out the junction shape to the screen.
+		/// </summary>
+		private void RenderJunctionShape(RectangleF bounds)
+		{
+			// Create a new polygon intersection
+			PointF pp = State.Player.Point;
+			PointF p1 = ToPoint(pp.X - bounds.Width, pp.Y - bounds.Height);
+			PointF p2 = ToPoint(pp.X + bounds.Width, pp.Y + bounds.Height);
+			IPoly screenRect = Geometry.CreateRectangle(
+				new RectangleF(p1, new SizeF(p2.X - p1.X, p2.Y - p1.Y)));
+
+			// Go through the internal shape
+			IPoly shape = State.JunctionManager.Junction.Shape;
+			IPoly shape0 = new PolyDefault();
+
+			for (int i = 0; i < shape.PointCount; i++)
+			{
+				PointF p0 =
+					ToPoint((float) shape.GetX(i), (float) shape.GetY(i));
+				shape0.Add(p0);
+			}
+
+			IPoly poly = screenRect.Intersection(shape0);
+
+			// Create the AGG tesselator and set it up
+			Tesselator tess = new Tesselator();
+			tess.callCombine += OnTesselatorCombine;
+			tess.callVertex += OnVertex;
+			tess.callMesh += OnMesh;
+			tess.callBegin += OnTesselatorBegin;
+			tess.callEnd += OnTesselatorEnd;
+
+			// OpenGL setup
+            Gl.glPushMatrix();
+            Gl.glDisable(Gl.GL_TEXTURE_2D);
+            BooGame.Camera.ApplyMatrix();
+
+			// Go through the junction's internal shape
+			renderPoints.Clear();
+			tess.BeginPolygon();
+			tess.BeginContour();
+
+			for (int i = 0; i < poly.PointCount; i++)
+			{
+				// Get the point
+				PointF p = new PointF(
+					(float) poly.GetX(i), (float) poly.GetY(i));
+					
+				// Add the vertex with the index it will have when we
+				// refer to it later.
+				tess.AddVertex(
+					new double [] { p.X, p.Y, 0 }, renderPoints.Count);
+				renderPoints.Add(p);
+			}
+
+			// Finish up the polygon, which renders the rendering
+			// commands
+			//Log.Info("Tesselating {0} points", renderPoints.Count);
+			tess.EndContour();
+			tess.EndPolygon();
+
+			// Finish up OpenGl
+            Gl.glEnable(Gl.GL_TEXTURE_2D);
+            Gl.glPopMatrix();
+		}
+
+		/// <summary>
+		/// Called to start up the GL processing.
+		/// </summary>
+		private void OnTesselatorBegin(Tesselator.TriangleListType type)
+		{
+			// Figure out the type of start
+			switch (type)
+			{
+				case Tesselator.TriangleListType.Triangles:
+					Gl.glBegin(Gl.GL_TRIANGLES);
+					break;
+					
+				case Tesselator.TriangleListType.TriangleFan:
+					Gl.glBegin(Gl.GL_TRIANGLE_FAN);
+					break;
+					
+				case Tesselator.TriangleListType.TriangleStrip:
+					Gl.glBegin(Gl.GL_TRIANGLE_STRIP);
+					break;
+					
+				default:
+					throw new Exception("unknown TriangleListType: " + type);
+			}
+		}
+
+		/// <summary>
+		/// Finishes up the OpenGL command.
+		/// </summary>
+		private void OnTesselatorEnd()
+		{
+			Gl.glEnd();
+		}
+
+		/// <summary>
+		/// Vertex callback on the tesselator.
+		/// </summary>
+		private void OnVertex(int data)
+		{
+			// Adjust the point for the current view
+			PointF p = renderPoints[data];
+
+			// Figure out the distance from the core and use that to
+			// set the color of the vertex.
+			double distance =
+				State.JunctionManager.Junction.CalculateDistance(p);
+
+			SetColor(distance);
+
+			// Render the vertex
+			Gl.glVertex2f(p.X, p.Y);
+		}
+
+		private void OnTesselatorCombine(
+			double [] coords3, int [] data4, double[] weight4, out int outData)
+		{
+			// Create a new point and add it
+			PointF p = new PointF((float) coords3[0], (float) coords3[1]);
+			outData = renderPoints.Count;
+			renderPoints.Add(p);
+		}
+
+		private void OnMesh(Mesh mesh)
+		{
+			//Log.Debug("  mesh!");
+		}
+
+		/// <summary>
+		/// Figures out the base background color for the polygon.
+		/// </summary>
+		private void SetColor(double distance)
+		{
+			// Convert this to a ratio
+			double ratio = distance / Constants.BombSafeDistance;
+			double r = 1;
+			double g = 1;
+			double b = 0.25;
+
+			// Set the red tones
+			if (ratio <= 0.25)
+				r = 1 - (3 * ratio);
+			else
+				r = 0.25;
+
+			// Set the green tones
+			if (ratio <= 0.50)
+				g = 1 - (1.5 * ratio);
+			else
+				g = 0.25;
+
+			// Set the blue tones
+			if (ratio >= 0.50)
+				b = (ratio - 0.50) / 2;
+
+			// Use the distance to figure out the color
+			Gl.glColor4f((float) r, (float) g, (float) b, 1);
 		}
 		#endregion
 

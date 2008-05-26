@@ -53,7 +53,7 @@ namespace RunningBomb.Themes
 			ThemeContext context = new ThemeContext();
 			context.DrawingArgs = args;
 			context.Callback = callback;
-			context.ScreenSize = VideoManager.Size;
+			context.ScreenSize = VideoManager.ScreenSize;
 			context.Theme = this;
 
 			context["width"] = context.ScreenSize.Width;
@@ -62,6 +62,10 @@ namespace RunningBomb.Themes
 			context["countdown"] = State.Score.CountdownString;
 			context["popsaved"] = State.Score.PopulationSaved;
 			context["popkilled"] = State.Score.PopulationKilled;
+			context["speed"] = State.Score.Speed;
+			context["maxspeed"] = State.Score.MaximumSpeed;
+			context["speedfmt"] = State.Score.SpeedString;
+			context["maxspeedfmt"] = State.Score.MaximumSpeedString;
 
 			// Get it
 			ThemeLayout tl = layouts[layout];

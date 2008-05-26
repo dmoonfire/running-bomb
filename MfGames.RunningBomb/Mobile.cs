@@ -61,7 +61,7 @@ namespace MfGames.RunningBomb
 					new PhysicsState(),
 					new PolygonShape(
 						VertexHelper.CreateRectangle(40, 40), 2),
-					300,
+					3,
 					new Coefficients(0.75f, 0.5f),
 					new Lifespan());
 				physicsBody.IsCollidable = true;

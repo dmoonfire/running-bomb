@@ -224,66 +224,19 @@ namespace MfGames.RunningBomb
 		/// </summary>
 		public double CalculateDistance(PointF point)
 		{
-			// We keep track of the five best points in terms of
-			// distance from the desired point and calculated length
-			// from before.
-			float [] fromPoint = new float [] {
-				Single.PositiveInfinity,
-				Single.PositiveInfinity,
-				Single.PositiveInfinity,
-				Single.PositiveInfinity,
-				Single.PositiveInfinity };
-			double [] fromCenter = new double [] {
-				Double.PositiveInfinity,
-				Double.PositiveInfinity,
-				Double.PositiveInfinity,
-				Double.PositiveInfinity,
-				Double.PositiveInfinity };
+			// Calculate from the center of each segment
+			double dis = Geometry.CalculateDistance(PointF.Empty, point)
+				+ this.Distance;
 
-			// Go through the center points
-			foreach (CenterPoint cp in CenterPoints)
-			{
-				// Get the distance from the point
-				float from = Geometry.CalculateDistance(point, cp.Point);
+			// See if we have a shorter distance from one of the
+			// segments, which will handle the parent segment or the others.
+			foreach (Segment s in Segments)
+				dis = Math.Min(dis,
+					Geometry.CalculateDistance(s.ChildJunctionPoint, point)
+					+ s.ChildJunction.Distance);
 
-				if (from < fromPoint[0])
-				{
-					// Shift everything down
-					for (int i = 4; i > 0; i--)
-					{
-						fromPoint[i - 1] = fromPoint[i];
-						fromCenter[i - 1] = fromCenter[i];
-					}
-
-					// Add it
-					fromPoint[0] = from;
-					fromCenter[0] = cp.RelativeDistance;
-				}
-			}
-
-			// When we get through all this, we have the five closest
-			// points to the given point which should ensure that at
-			// least one of them is closer to the center for an
-			// accurate distance. The closer ones might be in "front"
-			// of the point, but then the distance would incorrectly
-			// add.
-			double bestCenter = fromCenter[0];
-			float bestFrom = fromPoint[0];
-
-			for (int i = 1; i < 5; i++)
-			{
-				if (bestCenter > fromCenter[i])
-				{
-					bestCenter = fromCenter[i];
-					bestFrom = fromPoint[i];
-				}
-			}
-
-			// At this point, we have the point that is lowest from
-			// the center of the junction but the closest to the
-			// point, so just add the two distances (from point and
-			// from center) and return the results.
-			return bestFrom + bestCenter + this.Distance;
+			// Return the results
+			return dis;
 		}
 		#endregion
 
@@ -460,15 +413,13 @@ namespace MfGames.RunningBomb
 					return true;
 			}
 
-			// While we check the entire length of the segment to
-			// prevent crossthroughs, we only store a slightly smaller
-			// junction which excludes the center bit to allow for
-			// that constant overlap.
+			// Store the circle that represents this junction to
+			// prevent anything from getting too close.
 			IPoly circleTest = Geometry.CreateCircle(
-				PointF.Empty,
+				segment.ChildJunctionPoint,
 				Constants.OverlapConnectionDistance);
-			IPoly toRemove = newShape.Intersection(circleTest);
-			overlaps.Add(newShape.Xor(toRemove));
+			//IPoly toRemove = newShape.Intersection(circleTest);
+			overlaps.Add(circleTest); //newShape.Xor(toRemove));
 
 			// No intersections, so return false
 			return false;

@@ -5,6 +5,7 @@ using MfGames.RunningBomb;
 using MfGames.Sprite3;
 using MfGames.Sprite3.BooWorks;
 using System;
+using System.Drawing;
 
 namespace RunningBomb
 {
@@ -21,6 +22,8 @@ namespace RunningBomb
 		/// </summary>
 		public override void OnFocused()
 		{
+			// Set up some events
+			State.JunctionManager.JunctionChanged += OnJunctionChanged;
 		}
 
 		/// <summary>
@@ -31,11 +34,15 @@ namespace RunningBomb
 		/// </summary>
 		public override void OnUnfocused()
 		{
+			// Clean up our events
+			State.JunctionManager.JunctionChanged -= OnJunctionChanged;
 		}
 		#endregion
 
 		private bool isCountingDown = true;
-		private bool ignoreFirstUpdate = true;
+		private bool ignoreNextUpdate = true;
+		private Vector2D lastPoint;
+		private SpeedMeter speed = new SpeedMeter();
 
 		/// <summary>
 		/// Triggered when the user presses a key or mouse button.
@@ -98,7 +105,19 @@ namespace RunningBomb
 			State.Score.Distance = State.JunctionManager.Junction
 				.CalculateDistance(State.Player.Point);
 
+			// Update the speed
+			if (!ignoreNextUpdate)
+			{
+				Vector2D vec = State.Player.PhysicsBody.State.Position.Linear;
+				double distance = Vector2D.Distance(vec, lastPoint);
+				speed.Update(args, distance);
+				State.Score.Speed = (float) speed.Average;
+			}
+
+			lastPoint = State.Player.PhysicsBody.State.Position.Linear;
+
 			// Call the parent
+			ignoreNextUpdate = false;
 			return base.Update(args);
         }
 
@@ -109,11 +128,10 @@ namespace RunningBomb
 				return;
 
 			// See if we should ignore the first one
-			if (ignoreFirstUpdate)
+			if (ignoreNextUpdate)
 			{
 				// We use this to prevent the update from giving a
 				// large one at once.
-				ignoreFirstUpdate = false;
 				return;
 			}
 
@@ -138,11 +156,21 @@ namespace RunningBomb
 		{
 			float angle = State.Player.Angle;
 			float a = angle + (float) (Math.PI / 2) * count;
-			float cos = (float) Math.Cos(a) * force;
-			float sin = (float) Math.Sin(a) * force;
+			float cos = (float) Math.Cos(a) * force * 1000;
+			float sin = (float) Math.Sin(a) * force * 1000;
 
-			State.Player.PhysicsBody.State.Velocity.Linear.X += cos;
-			State.Player.PhysicsBody.State.Velocity.Linear.Y += sin;
+			State.Player.PhysicsBody.ApplyForce(
+				new Vector2D(cos, sin));
 		}
+
+		#region Events
+		/// <summary>
+		/// Triggered when the junction changes.
+		/// </summary>
+		private void OnJunctionChanged(object sender, EventArgs args)
+		{
+			ignoreNextUpdate = true;
+		}
+		#endregion
 	}
 }

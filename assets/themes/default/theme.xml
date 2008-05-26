@@ -38,5 +38,12 @@
 	color="#FFFFFF"
 	format="{0} s"
 	variables="countdown" />
+
+    <string
+	font="scores"
+	x="width - 10" y="82"
+	color="#FFFFFF"
+	format="{0}"
+	variables="speedfmt" />
   </layout>
 </theme>

@@ -14,6 +14,7 @@ namespace MfGames.RunningBomb
 		private long killed;
 		private float countdown;
 		private float countdownMultiplier = 1;
+		private float speed, maxSpeed;
 
 		/// <summary>
 		/// Contains the number of seconds left in the countdown.
@@ -72,6 +73,28 @@ namespace MfGames.RunningBomb
 					throw new Exception("Cannot set a negative distance");
 
 				distance = value;
+			}
+		}
+
+		/// <summary>
+		/// Contains the current speed of the player. This also
+		/// calculates the maximum speed.
+		/// </summary>
+		public float MaximumSpeed
+		{
+			get { return maxSpeed; }
+		}
+
+		/// <summary>
+		/// Contains the formatted maximum speed.
+		/// </summary>
+		public string MaximumSpeedString
+		{
+			get
+			{
+				// Returns the maximum speed as a formatted
+				// string of meters per second.
+				return String.Format("{0:N1} m/s", MaximumSpeed);
 			}
 		}
 
@@ -153,6 +176,33 @@ namespace MfGames.RunningBomb
 					* Math.Log(Distance, 10)
 					* BadgeTotal;
 				return (int) score;
+			}
+		}
+
+		/// <summary>
+		/// Contains the current speed of the player. This also
+		/// calculates the maximum speed.
+		/// </summary>
+		public float Speed
+		{
+			get { return speed; }
+			set
+			{
+				maxSpeed = (float) Math.Max(speed, value);
+				speed = value;
+			}
+		}
+
+		/// <summary>
+		/// Contains the formatted speed.
+		/// </summary>
+		public string SpeedString
+		{
+			get
+			{
+				// Returns the maximum speed as a formatted
+				// string.
+				return String.Format("{0:N1} k/s", speed);
 			}
 		}
 		#endregion

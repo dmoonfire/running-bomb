@@ -1,4 +1,5 @@
 using MfGames.Sprite3;
+using MfGames.Sprite3.Backends;
 using System;
 using System.Drawing;
 using System.Xml;
@@ -39,11 +40,20 @@ namespace RunningBomb.Themes
 			float ry = y.GetValue(context);
 			float rw = w.GetValue(context);
 			float rh = h.GetValue(context);
+			RectangleF bounds = new RectangleF(rx, ry, rw, rh);
+
+			// Set the clipping area
+			IBackendDrawingArgs ibda = context.DrawingArgs.Backend
+				.SetClippingRegion(
+					context.DrawingArgs.BackendDrawingArgs, bounds);
+			context.DrawingArgs.BackendDrawingArgs = ibda;
 
 			// Call the viewport
-			context.Callback.DrawViewport(
-				context.DrawingArgs,
-				new RectangleF(rx, ry, rw, rh));
+			context.Callback.DrawViewport(context.DrawingArgs, bounds);
+
+			// Clear the clip
+			context.DrawingArgs.BackendDrawingArgs =
+				context.DrawingArgs.Backend.ClearClippingRegion(ibda);
 		}
 		#endregion
 	}
