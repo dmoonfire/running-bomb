@@ -7,6 +7,7 @@ using MfGames.RunningBomb;
 using MfGames.Utility;
 using MfGames.Sprite3;
 using MfGames.Sprite3.BooWorks;
+using RunningBomb.Audio;
 using RunningBomb.Themes;
 using System;
 using System.Drawing;
@@ -51,6 +52,12 @@ namespace RunningBomb
 			{
 				index = items.Count;
 				items.Add("Resume");
+			}
+			else
+			{
+				// Reset our music
+				AudioManager.ResetBackgroundSamples();
+				Core.ClearColor = new ColorF(Color.Black);
 			}
 		}
 
@@ -203,6 +210,9 @@ namespace RunningBomb
 		/// </summary>
         public override bool Update(UpdateArgs args)
         {
+			// Update the sound manager
+			AudioManager.Update(args);
+
 			// Don't let it update since we might be playing a game
 			return false;
         }

@@ -100,5 +100,35 @@ namespace MfGames.RunningBomb
 		/// </summary>
 		public const float StartingCountdown = 300;
 		#endregion
+
+		#region Audio Settings
+		/// <summary>
+		/// This is the maximum number of audio samples we can be
+		/// running at one time.
+		/// </summary>
+		public const int MaximumAudioSamples = 8;
+
+		/// <summary>
+		/// This the maximum number of beats per second that the
+		/// system will play.
+		/// </summary>
+		public const int MaximumBeatsPerLoop = 8;
+
+		/// <summary>
+		/// Contains the maximum number of sound chunks to allocate.
+		/// </summary>
+		public const int MaximumSoundChunks =
+			MaximumAudioSamples * 16 + 10;
+
+		/// <summary>
+		/// The number of seconds before a rhythm is changed.
+		/// </summary>
+		public const double AudioUpdateSpeed = 10;
+
+		/// <summary>
+		/// The number of seconds in a loop.
+		/// </summary>
+		public const double LoopSeconds = 4;
+		#endregion
 	}
 }

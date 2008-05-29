@@ -64,6 +64,7 @@ runningbomb_FILES =  \
 	running-bomb/TextScrollGameMode.cs \
 	running-bomb/TextScrollLine.cs \
 	running-bomb/LineType.cs \
+	running-bomb/Assets.cs \
 	running-bomb/TestThemeGameMode.cs \
 	running-bomb/Themes/ThemeManager.cs \
 	running-bomb/Themes/Theme.cs \
@@ -77,6 +78,7 @@ runningbomb_FILES =  \
 	running-bomb/Themes/ThemeString.cs \
 	running-bomb/Themes/IThemeCommand.cs \
 	running-bomb/RunningBombEntry.cs \
+	running-bomb/Audio/AudioManager.cs \
 	Tesselate/ActiveRegion.cs \
 	Tesselate/ContourVertex.cs \
 	Tesselate/Dictionary.cs \
@@ -157,6 +159,7 @@ $(runningbomb_ASSEMBLY): assets/credits.txt assets/story.txt assets/help.txt
 		@mfgames_sprite3_boogamebe_LIBS@ \
 		@gpc_LIBS@ \
 		@tao_opengl_LIBS@ \
+		@tao_sdl_LIBS@ \
 		-r:libs/C5.dll \
 		-r:libs/AdvanceMath.dll \
 		-r:libs/Physics2DDotNet.dll \

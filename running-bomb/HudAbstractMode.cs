@@ -24,31 +24,13 @@ namespace RunningBomb
         /// <param name="args"></param>
         public override void Draw(DrawingArgs args)
 		{
+			// Reset our clear color
+			BooGame.Core.ClearColor = 
+				new BooGame.Video.ColorF((float) State.Score.Stress / 2, 0, 0);
+
 			// Get the theme and render using it
 			Theme theme = ThemeManager.Theme;
 			theme.Render(Theme.UniverseLayout, this, args);
-
-			/*
-			// Display statistics
-			PointF playerPoint = State.Player.Point;
-		    font.Print(String.Format("  Player: {0:N2}x{1:N2} @ {2:N4}",
-					playerPoint.X, playerPoint.Y,
-					State.Player.PhysicsBody.State.Position.Angular),
-				Color.White, 10, 10 + FontSize * 0,
-				ContentAlignment.TopLeft);
-
-		    font.Print(String.Format("Velocity: {0:N2}x{1:N2} @ {2:N4}",
-					State.Player.PhysicsBody.State.Velocity.Linear.X,
-					State.Player.PhysicsBody.State.Velocity.Linear.Y,
-					State.Player.PhysicsBody.State.Velocity.Angular),
-				Color.White, 10, 10 + FontSize * 1,
-				ContentAlignment.TopLeft);
-
-			// Format the time
-		    font.Print("Countdown: " + State.Score.CountdownString,
-				Color.White, 10, 10 + FontSize * 2,
-				ContentAlignment.TopLeft);
-			*/
 		}
 
 		/// <summary>

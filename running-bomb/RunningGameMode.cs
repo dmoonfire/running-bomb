@@ -4,6 +4,7 @@ using MfGames.Input;
 using MfGames.RunningBomb;
 using MfGames.Sprite3;
 using MfGames.Sprite3.BooWorks;
+using RunningBomb.Audio;
 using System;
 using System.Drawing;
 
@@ -72,6 +73,10 @@ namespace RunningBomb
 		/// </summary>
         public override bool Update(UpdateArgs args)
         {
+			// Update the audio
+			AudioManager.Update(args);
+
+			// Process our keyboard
 			float s = (float) args.SecondsSinceLastUpdate * 100;
             
             if (Core.InputManager.IsActivated(InputTokens.NumPad7))

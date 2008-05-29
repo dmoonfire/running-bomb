@@ -1,0 +1,38 @@
+<!--
+    This is the voice asset generation file and also the internal control
+    file for the various conversations. This prevents certain voiceovers
+    being used more than once in a single run or to require another
+    conversation to start before the reference once is used. That way, we
+    can generate some sort of "plot" with the voiceovers.
+-->
+
+<voiceovers>
+  <!-- Ship Computer Statements -->
+  <voice type="ShipComputer" format="mbrola:us1">
+    <category type="Idle">
+      <phrase id="1000">
+	<text>Would you like to register your bubble ship?</text>
+      </phrase>
+    </category>
+  </voice>
+
+  <!-- Police Control -->
+  <voice type="PoliceControl" format="festival:ked_diphone">
+    <category type="Idle">
+      <phrase id="2000">
+	<text>Attention, all local officers. Do not stop
+	registration</text>
+	<ship-id/>
+	<text>or we will all die.</text>
+      </phrase>
+    </category>
+  </voice>
+
+  <!-- Traffic Control -->
+  <voice type="TrafficControl" format="festival:don_diphone">
+  </voice>
+
+  <!-- General Announcement Control -->
+  <voice type="GeneralAnnouncement" format="mbrola:en1">
+  </voice>
+</voiceovers>

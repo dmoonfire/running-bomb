@@ -1,3 +1,4 @@
+using RunningBomb;
 using System;
 using System.Drawing;
 using System.IO;
@@ -15,7 +16,7 @@ namespace RunningBomb.Themes
 		{
 			// Sets up the default theme
 			theme = new Theme();
-			theme.Read(new FileInfo("../assets/themes/default/theme.xml"));
+			theme.Read(Assets.GetAssetFile("themes/default/theme.xml"));
 
 			// Set up the events
 		}

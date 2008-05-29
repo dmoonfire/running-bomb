@@ -1,5 +1,6 @@
 using MfGames.RunningBomb;
 using MfGames.Sprite3.BooWorks;
+using RunningBomb.Audio;
 
 namespace RunningBomb
 {
@@ -24,6 +25,9 @@ namespace RunningBomb
 
 			// Set up the view state
 			ViewState.Scale = 0.5f;
+
+			// Set up our basic sound
+			AudioManager.ResetBackgroundSamples();
 
 			// Switch to the running mode
 			GameModeManager.Set(new RunningGameMode());

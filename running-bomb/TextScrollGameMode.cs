@@ -146,6 +146,12 @@ namespace RunningBomb
         /// <param name="args"></param>
         public override void Draw(DrawingArgs args)
 		{
+			// Dark-screen everything
+			BooGame.Video.Paint.FilledRectangle(0, 0,
+				VideoManager.ScreenSize.Width,
+				VideoManager.ScreenSize.Height,
+				Color.FromArgb(255, 0, 0, 0));
+
 			// Get the theme and render using it
 			Theme theme = ThemeManager.Theme;
 			theme.Render(Theme.TextLayout, this, args);

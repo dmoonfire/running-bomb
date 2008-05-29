@@ -216,6 +216,19 @@ namespace MfGames.RunningBomb
 				return String.Format("{0:N1} k/s", speed);
 			}
 		}
+
+		/// <summary>
+		/// Contains a stress rating which is a number between 0 and 1
+		/// where 1 is the highest stress the player can have.
+		/// </summary>
+		public double Stress
+		{
+			get
+			{
+				return Math.Min(1,
+					1 - (countdown / Constants.StartingCountdown));
+			}
+		}
 		#endregion
 
 		#region Badges

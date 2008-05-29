@@ -1,0 +1,195 @@
+#!/usr/bin/perl
+
+#
+# Setup
+#
+
+# Directives
+use strict;
+use warnings;
+
+# Modules
+use File::Basename;
+use XML::Parser;
+
+# Variables
+my @digits = qw(a b c d e f 0 1 2 3 4 5 6 7 8 9);
+
+#
+# Figure out the paths
+#
+
+# Make sure we have a file
+die "USAGE: $0 voices.xml" unless $ARGV[0];
+die "File $ARGV[0] does not exist" unless -f $ARGV[0];
+
+# Pull out the filename
+my $filename = shift @ARGV;
+my $directory = dirname($filename);
+
+# Noise
+print STDERR "Input File: $filename\n";
+print STDERR " Directory: $directory\n";
+
+#
+# Parse the file as XML
+#
+
+my $xml = new XML::Parser(
+    Handlers => {
+	Start => \&on_start,
+	End => \&on_end,
+	Char => \&on_char,
+    });
+$xml->parsefile($filename);
+
+#
+# XML Handlers
+#
+
+my $voxdir;
+my $phrase_id;
+my $sub_phrase_id;
+my $buffer;
+
+sub on_start
+{
+    # Get the elements
+    shift @_;
+    my $tag = shift @_;
+    my %attrs = @_;
+
+    # Figure out what to do
+    if ($tag eq "voice")
+    {
+	# Set up the current voice information
+	print STDERR "Voice: $attrs{type} (format=$attrs{format})\n";
+	my $type = $attrs{type};
+	my $format = $attrs{format};
+
+ 	# Figure out the output directory and make sure it exists
+	$voxdir = "$directory/$type";
+	mkdir $voxdir unless -d $voxdir;
+	print STDERR "  Voice Directory: $voxdir\n";
+
+	# Figure out the handler for the voice
+	prepare_voice($format);
+	
+	# Generate the hex symbols for ship identification
+	foreach my $digit (@digits)
+	{
+	    generate_phrase("char-$digit", "$digit");
+	}
+    }
+    elsif ($tag eq "phrase")
+    {
+	# Get the ID
+	$phrase_id = $attrs{id};
+	$sub_phrase_id = 0;
+    }
+    elsif ($tag eq "text")
+    {
+	# We are about to say something
+	$buffer = "";
+    }
+    else
+    {
+	print STDERR "start! $tag\n";
+    }
+}
+
+sub on_end
+{
+    # Get the elements
+    shift @_;
+    my $tag = shift @_;
+    my %attrs = @_;
+
+    # Figure out what to do
+    if ($tag eq "text")
+    {
+	# Generate the buffer
+	generate_phrase("phrase-$phrase_id-$sub_phrase_id", "$buffer");
+
+	# Finish up by incrementing the sub_id
+	$sub_phrase_id++;
+    }
+}
+
+sub on_char
+{
+    # Get the elements
+    shift @_;
+    $buffer .= shift @_;
+}
+
+#
+# Voice Generation
+#
+
+my $driver = "festival";
+my $voice = "en1";
+
+sub prepare_voice
+{
+    # Get the format we are parsing
+    my $format = shift;
+    my @parts = split(/:/, $format);
+    
+    # Figure out the type
+    $driver = $parts[0];
+    $voice = $parts[1];
+
+    # Noise
+    print STDERR "     Voice Format: $driver with $voice\n";
+}
+
+sub generate_phrase
+{
+    # Get the parts of the phase
+    my $id = shift;
+    my $phrase = shift;
+
+    # Some some phrase modifications
+    $phrase = "aa" if $phrase eq "a";
+
+    # Noise
+    print STDERR "  Phrase: $id\n";
+    my $voxfile = "$voxdir/$id";
+
+    # Figure out the driver
+    if ($driver eq "festival")
+    {
+	# Open up a pipe and create the .wav
+	my $cmd = "/usr/bin/text2wave -o $voxfile.wav -eval '(voice_$voice)'";
+	open PIPE, "| $cmd" or die "Cannot open festival pipe ($!)";
+	print PIPE $phrase;
+	close PIPE;
+
+	# Convert this to an .ogg file
+	system("/usr/bin/oggenc -Q $voxfile.wav");
+
+	# Remove the .wav
+	unlink("$voxfile.wav");
+    }
+    elsif ($driver eq "mbrola")
+    {
+	# Generate using mbrola using a pipe
+	my $cmd = "/usr/bin/espeak -v mb-$voice "
+	    . "| mbrola -e /usr/share/mbrola/$voice - $voxfile.wav";
+	open PIPE, "| $cmd" or die "Cannot open festival pipe ($!)";
+	print PIPE $phrase;
+	close PIPE;
+
+	# Convert this to an .ogg file
+	system("/usr/bin/oggenc -Q $voxfile.wav");
+
+	# Remove the .wav
+	unlink("$voxfile.wav");
+    }
+    else
+    {
+	# No idea
+	die "Unknown driver $driver";
+    }
+}

@@ -1,6 +1,8 @@
 using MfGames.Sprite3;
 using MfGames.Sprite3.BooWorks;
 using MfGames.Utility;
+using RunningBomb.Audio;
+using System;
 using System.IO;
 
 namespace RunningBomb
@@ -17,8 +19,25 @@ namespace RunningBomb
 		{
 			// Set up the works infrastructure
 			BooWorksManager bwm = new BooWorksManager();
-			//bwm.Run(ConfigFile, new TestThemeGameMode());
+			bwm.Startup(ConfigFile);
+
+			// Set up the clean up event
+			BooGame.Core.Exiting += OnShutdown;
+
+			// Set up our audio settings
+			AudioManager.Startup();
+
+			// Start the game
 			bwm.Run(ConfigFile, new MainMenuGameMode());
+		}
+
+		/// <summary>
+		/// Registers when the system attempts to shut down.
+		/// </summary>
+		private static void OnShutdown(object sender, EventArgs args)
+		{
+			// Stop music
+			AudioManager.Stop();
 		}
 
 		#region Configuration
