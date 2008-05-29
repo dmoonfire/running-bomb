@@ -174,6 +174,7 @@ namespace RunningBomb.Audio
 						i, SdlMixer.Mix_GetError());
 				}
 
+				SdlMixer.Mix_VolumeChunk(ptr, 45);
 				loopChunks.Add(ptr);
 
 				// Make a bit of sound
