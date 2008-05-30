@@ -15,6 +15,7 @@ namespace MfGames.RunningBomb
 		private float countdown;
 		private float countdownMultiplier = 1;
 		private float speed, maxSpeed;
+		private float explosion;
 
 		/// <summary>
 		/// Contains the number of seconds left in the countdown.
@@ -74,6 +75,16 @@ namespace MfGames.RunningBomb
 
 				distance = value;
 			}
+		}
+
+		/// <summary>
+		/// The point where the bomb actually explodes which is
+		/// normally 0 to 10 seconds after the countdown.
+		/// </summary>
+		public float Explosion
+		{
+			get { return explosion; }
+			set { explosion = value; }
 		}
 
 		/// <summary>

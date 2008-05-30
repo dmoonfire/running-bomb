@@ -4,35 +4,286 @@
     being used more than once in a single run or to require another
     conversation to start before the reference once is used. That way, we
     can generate some sort of "plot" with the voiceovers.
+    
+    Category:
+
+    Every phrase has a PhraseType associated with it, which is used by
+    the AudioManager to retrieve a random phrase from the system. The
+    categories are:
+    
+    * Idle - Random sayings called every X seconds.
+    * ImmobileImpact - Called when the ship hits an immobile object.
+    * ModuleInstalled - Called after a new module has been attached.
+    * ModuleDestroyed - Called after a module has been destroyed.
+    * ModuleEjected - Called after the user ejects a random module.
+    
+    Phrase
+    id
+    Every phrase has an ID which is used for the filename and for loading.
+    requires
+    A comma/space separate list of ID's that must have been played before this
+    one becomes a viable choice. If not set, there are no requirements.
+    conflicts
+    A comma/space separated list of ID's that cannot have been played before this is
+    a viable choice. If not set, there are no conflicts. This allows for random
+    branching on the voice over plots.
+    repeat
+    The number of seconds before the phrase can be repeated again. If not set, this is
+    set to never repeat in a single run.
+    min-distance and max-distance
+    The minimum or maximum distance, respectively, that the phrase is viable.
+    min-bubble and max-bubble
+    The minimum or maximum BubbleTech level in the ConstructionControl for this phrase
+    to be viable.
+    min-speed and max-speed
+    The minimum or maximum speed in meters per second that this phrase is viable.
 -->
 
 <voiceovers>
-  <!-- Ship Computer Statements -->
+  <!-- Ship Computer Statements (1xxx) -->
   <voice type="ShipComputer" format="mbrola:us1">
-    <category type="Idle">
-      <phrase id="1000">
+    <category type="Idle"> <!-- 10xx -->
+      <phrase id="1000" repeat="120">
 	<text>Would you like to register your bubble ship?</text>
+      </phrase>
+      
+      <phrase id="1001">
+	<text>There is a tutorial for this ship, would you like to spend ten minutes watching it?</text>
+      </phrase>
+      
+      <phrase id="1002" repeat="120">
+	<text>Have you heard the benefits of registering your ship with BubbleTech?</text>
+      </phrase>
+      
+      <phrase id="1003">
+	<text>Warning, self destruct activated.</text>
+      </phrase>
+      
+      <phrase id="1004" requires='1003'>
+	<text>Self destruct has been successfully destroyed.</text>
+      </phrase>
+      
+      <phrase id="1005">
+	<text>Welcome to your new BubbleShip. Please fly safely.</text>
+      </phrase>
+      
+      <phrase id="1006" repeat="120">
+	<text>Please register your BubbleShip with BubbleTech.</text>
+      </phrase>
+      
+      <phrase id="1007" repeat="120">
+	<text>Are you interested in our extended warranty?</text>
+      </phrase>
+      
+      <phrase id="1008" min-distance="40000">
+	<text>You are now due for your initial oil change.</text>
+      </phrase>
+      
+      <phrase id="1009" min-distance="500000">
+	<text>Warnings, this ship is not designed for prolonged, high-speed flying.</text>
+      </phrase>
+      
+      <phrase id="1010">
+	<text>Scanning interior system.</text>
+      </phrase>
+      
+      <phrase id="1011" requires="1010">
+	<text>Explosive device found on board.</text>
+      </phrase>
+      
+      <phrase id="1012">
+	<text>You have disabled the bomb cutoff switch.</text>
+      </phrase>
+      
+      <phrase id="1013" min-distance="80000" requires="1008">
+	<text>You are now due for your second, and first, oil change.</text>
+      </phrase>
+      
+      <phrase id="1014" min-distance="120000" requires="1013">
+	<text>You aren't planning on going in for an oil change, are you?</text>
+      </phrase>
+      
+      <phrase id="1015" requires="1010">
+	<text>Your heartrate is elevated.</text>
+      </phrase>
+      
+      <phrase id="1016" requires="1010">
+	<text>Your stress levels are high.</text>
+      </phrase>
+      
+      <phrase id="1017" requires="1010">
+	<text>You may consider less beef in your diet.</text>
+      </phrase>
+    </category>
+    
+    <category type="ImmobileImpact"> <!-- 11xx -->
+      <phrase id="1101" repeat="30">
+	<text>Door is ajar.</text>
+      </phrase>
+      <phrase id="1102" repeat="30">
+	<text>Please check your oil.</text>
+      </phrase>
+      <phrase id="1103" repeat="30">
+	<text>Your engine trouble light is on.</text>
+      </phrase>
+      <phrase id="1104" repeat="30">
+	<text>Please fasten seatbelts.</text>
+      </phrase>
+      <phrase id="1105" repeat="30">
+	<text>Interior smoke generator activated.</text>
+      </phrase>
+      <phrase id="1106" repeat="30">
+	<text>Activating chompers in engine room.</text>
+      </phrase>
+      <phrase id="1107" repeat="30">
+	<text>Performing system test.</text>
+      </phrase>
+      <phrase id="1108" repeat="30">
+	<text>Systems nominal.</text>
+      </phrase>
+      <phrase id="1109" repeat="30">
+	<text>Rebooting system.</text>
       </phrase>
     </category>
   </voice>
-
-  <!-- Police Control -->
+  
+  <!-- Police Control (2xxx) -->
   <voice type="PoliceControl" format="festival:ked_diphone">
-    <category type="Idle">
-      <phrase id="2000">
-	<text>Attention, all local officers. Do not stop
-	registration</text>
+    <category type="Idle"> <!-- 20xx -->
+      <phrase id="2000" conflicts="2008" repeat="60">
+	<text>99-424: Attention, all local officers. Do not stop registration</text>
 	<ship-id/>
 	<text>or we will all die.</text>
       </phrase>
+      
+      <phrase id="2001" conflicts="2008">
+	<text>99-277: Please fill all quotas in the next three minutes.</text>
+      </phrase>
+      
+      <phrase id="2002" conflicts="2008">
+	<text>07-342: Reported disturbance in the high-speed train system.</text>
+      </phrase>
+      
+      <phrase id="2003" conflicts="2008">
+	<text>07-203: Reported disturbance in tunnel 2A stroke 4F5.</text>
+      </phrase>
+      
+      <phrase id="2004">
+	<text>99-278: Reported crime: police control station 82 has been abandoned.</text>
+      </phrase>
+      
+      <phrase id="2005">
+	<text>99-278: Reported crime: police control station 103 has been abandoned.</text>
+      </phrase>
+      
+      <phrase id="2006" requires="2004,2005">
+	<text>99-278: Reported crime: police control stations 19 through 420 have been abandoned.</text>
+      </phrase>
+      
+      <phrase id="2007" requires="2006">
+	<text>99-998: Reported crime: all police control stations have been abandoned.</text>
+      </phrase>
+      
+      <phrase id="2008" requires="2007">
+	<text>99-999: Reported crime: police control is being abandoned.</text>
+      </phrase>
+      
+      <phrase id="2009" conflicts="2008">
+	<text>1C-023: In this time of need, the important things must be remembered. Report all salad bars to the authorities.</text>
+      </phrase>
+      
+      <phrase id="2010" conflicts="2008">
+	<text>1C-067: Report any calm individuals who may have set this bomb.</text>
+      </phrase>
     </category>
   </voice>
-
-  <!-- Traffic Control -->
+  
+  <!-- Traffic Control (3xxx) -->
   <voice type="TrafficControl" format="festival:don_diphone">
+    <category type="Idle"> <!-- 30xx -->
+      <phrase id="3000" repeat="30" min-bubble="10" min-speed='120'>
+	<ship-id/>
+	<text>: Reduce speed to under one hundred meters per second.</text>
+      </phrase>
+      
+      <phrase id="3001" repeat="120" min-bubble="10" max-speed='10'>
+	<ship-id/>
+	<text>: Please increase speed to beyond posted limits.</text>
+      </phrase>
+      
+      <phrase id="3002" repeat="30" min-bubble="10" min-speed='100'>
+	<ship-id/>
+	<text>: One point has been taken from your license for speeding.</text>
+      </phrase>
+    </category>
   </voice>
-
-  <!-- General Announcement Control -->
+  
+  <!-- General Announcement Control (4xxx) -->
   <voice type="GeneralAnnouncement" format="mbrola:en1">
+    <category type="Idle"> <!-- 40xx -->
+      <phrase id="4001">
+	<text>Citizens with green or less access, please remain on the left side of all hallways.</text>
+      </phrase>
+      <phrase id="4002">
+	<text>Citizens with yellow or higher, continue to scream and panic.</text>
+      </phrase>
+      <phrase id="4003">
+	<text>Citizens with red clearance, do what you want, we can't stop you.</text>
+      </phrase>
+      <phrase id="4004">
+	<text>The posthumous cermeony for our brave pilot will be tomorrow at fourteen hundred.</text>
+      </phrase>
+      <phrase id="4005">
+	<text>To the lady with the small dog blocking hallway F2 stroke 8A3, please step aside.</text>
+      </phrase>
+      <phrase id="4006">
+	<text>To the small dog with the lady in hallway F2 stroke 8A4, please abandon your owner.</text>
+      </phrase>
+      <phrase id="4007">
+	<text>Remember, tomorrow is recycling day. Please remember to recycle your debris.</text>
+      </phrase>
+      <phrase id="4008">
+	<text>In the likely occurance of death, taxes are still due in six days.</text>
+      </phrase>
+      <phrase id="4009">
+	<text>Remember, tomorrow is recycling day. Please remember to recycle your debris.</text>
+      </phrase>
+      <phrase id="4010">
+	<text>Ladies, please be nice to all men, it may literaly be their last moments alive.</text>
+      </phrase>
+      <phrase id="4011">
+	<text>Gentlemen, please be nice to all women, do not walk over their bodies in your panic.</text>
+      </phrase>
+      <phrase id="4012">
+	<text>Ladies, please be nice to all men, aiming for the groin is not acceptable and will be reported.</text>
+      </phrase>
+      <phrase id="4013">
+	<text>Gentlemen, please be nice to all women, hold the door open as you shove your way through it.</text>
+      </phrase>
+      <phrase id="4014">
+	<text>Cash registers in riot area fifteen are now available for looting.</text>
+      </phrase>
+      <phrase id="4015">
+	<text>BubbleCo is overing a fifteen percent discount on all life rafts.</text>
+      </phrase>
+      <phrase id="4016">
+	<text>Sponge cake is not an acceptable form of blast shelter.</text>
+      </phrase>
+      <phrase id="4017">
+	<text>Lead shielding is not an acceptable form of dinner.</text>
+      </phrase>
+      <phrase id="4018">
+	<text>How are we handling this crisis? Please register your complaints now.</text>
+      </phrase>
+      <phrase id="4019">
+	<text>Citizens with blue access, please remain in your homes.</text>
+      </phrase>
+      <phrase id="4020">
+	<text>For up to the minute panic, please watch channel five.</text>
+      </phrase>
+      <phrase id="4021" requires="4019,4016">
+	<text>Citizens with blue access, sponge cake will save you from the blast.</text>
+      </phrase>
+    </category>
   </voice>
 </voiceovers>

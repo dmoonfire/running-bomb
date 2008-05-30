@@ -56,7 +56,6 @@ namespace MfGames.RunningBomb
 					return physicsBody;
 
 				// Create the body
-				Log.Info("Creating physics!");
 				physicsBody = new Body(
 					new PhysicsState(),
 					new PolygonShape(

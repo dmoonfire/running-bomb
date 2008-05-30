@@ -247,6 +247,14 @@ namespace MfGames.RunningBomb
 			new LinkedList<Segment>();
 
 		/// <summary>
+		/// Returns true if the connections have been built.
+		/// </summary>
+		public bool HasBuiltConnections
+		{
+			get { return builtConnections; }
+		}
+
+		/// <summary>
 		/// Returns a read-only list of the junction nodes from this
 		/// element.
 		/// </summary>
@@ -354,6 +362,11 @@ namespace MfGames.RunningBomb
 					Log.Debug("Rejection because segments overlap");
 					continue;
 				}
+
+				// Add some clutter
+				IClutterFactory icf =
+					FactoryManager.ChooseClutterFactory(Random);
+				icf.Create(segment);
 
 				// Add it to the segments
 				segments.Add(segment);
@@ -559,6 +572,18 @@ namespace MfGames.RunningBomb
 
 			// Process this one
 			CreateJunctionPhysics(depth, intersection, rect);
+		}
+		#endregion
+
+		#region Mobiles
+		private LinkedList<Mobile> mobiles = new LinkedList<Mobile>();
+
+		/// <summary>
+		/// Contains a list of all mobiles in the junction.
+		/// </summary>
+		public IList<Mobile> Mobiles
+		{
+			get { return mobiles; }
 		}
 		#endregion
 

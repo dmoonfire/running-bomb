@@ -118,17 +118,17 @@ namespace MfGames.RunningBomb
 		/// Contains the maximum number of sound chunks to allocate.
 		/// </summary>
 		public const int MaximumSoundChunks =
-			MaximumAudioSamples * 16 + 10;
+			MaximumAudioSamples * MaximumBeatsPerLoop + 10;
 
 		/// <summary>
 		/// The number of seconds before a rhythm is changed.
 		/// </summary>
-		public const double AudioUpdateSpeed = 10;
+		public const double AudioUpdateSpeed = 4;
 
 		/// <summary>
 		/// The number of seconds in a loop.
 		/// </summary>
-		public const double LoopSeconds = 4;
+		public const double LoopSeconds = 2;
 		#endregion
 	}
 }

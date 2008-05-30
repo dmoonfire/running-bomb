@@ -6,7 +6,7 @@ namespace MfGames.RunningBomb
 	/// Implements the player's ship in the universe.
 	/// </summary>
 	public class Player
-	: Mobile
+	: Module
 	{
 		public Player()
 		{

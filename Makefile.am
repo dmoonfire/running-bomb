@@ -14,6 +14,11 @@ mfgames_runningbomb_FILES =  \
 	MfGames.RunningBomb/Draw/DrawingCommandsReader.cs \
 	MfGames.RunningBomb/Physics.cs \
 	MfGames.RunningBomb/Mobile.cs \
+	MfGames.RunningBomb/MobileBubble.cs \
+	MfGames.RunningBomb/HousingBubble.cs \
+	MfGames.RunningBomb/Module.cs \
+	MfGames.RunningBomb/IClutterFactory.cs \
+	MfGames.RunningBomb/SimpleClutterFactory.cs \
 	MfGames.RunningBomb/Player.cs \
 	MfGames.RunningBomb/State.cs \
 	MfGames.RunningBomb/Junction.cs \

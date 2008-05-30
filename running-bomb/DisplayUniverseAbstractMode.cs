@@ -71,6 +71,16 @@ namespace RunningBomb
 			// Render all the mobiles
 			foreach (Mobile m in State.Physics.Mobiles)
 				Render(m);
+
+			// See if we need to add any physics objects
+			foreach (Mobile m in State.JunctionManager.Junction.Mobiles)
+			{
+				if (!State.Physics.Mobiles.Contains(m))
+				{
+					// Add this mobile to the physics
+					State.Physics.Mobiles.Add(m);
+				}
+			}
 		}
 
 		/// <summary>
@@ -89,11 +99,15 @@ namespace RunningBomb
 			// Go through their bodies
 			foreach (Body body in State.JunctionManager.JunctionBodies)
 			{
-				RenderPolygon((PolygonShape) body.Shape, body.Matrices.ToWorld);
+				RenderPolygon(
+					(PolygonShape) body.Shape,
+					PointF.Empty,
+					body.Matrices.ToWorld);
 			}
 		}
 
-		private void RenderPolygon(PolygonShape pps, Matrix2x3 matrix)
+		private void RenderPolygon(
+			PolygonShape pps, PointF point, Matrix2x3 matrix)
 		{
 			/* HACK: This is a hack. I couldn't figure out the
 			// calculations at this point, so I just dove into the
@@ -114,8 +128,8 @@ namespace RunningBomb
 					ref pps.Vertexes[i1], out v1);
 				Vector2D.Transform(ref matrix,
 					ref pps.Vertexes[i2], out v2);
-				PointF p1 = ToPoint(v1.X, v1.Y);
-				PointF p2 = ToPoint(v2.X, v2.Y);
+				PointF p1 = ToPoint(v1.X + point.X, v1.Y + point.Y);
+				PointF p2 = ToPoint(v2.X + point.X, v2.Y + point.Y);
 				
 				Color color = Color.Gray;
 
@@ -126,9 +140,14 @@ namespace RunningBomb
 			}
 		}
 
+		/// <summary>
+		/// Renders out a single mobile.
+		/// </summary>
 		private void Render(Mobile mobile)
 		{
+			// See if we are in the physics
 			RenderPolygon((PolygonShape) mobile.PhysicsBody.Shape,
+				mobile.Point,
 				mobile.PhysicsBody.Matrices.ToWorld);
 		}
 

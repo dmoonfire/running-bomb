@@ -10,6 +10,16 @@ namespace MfGames.RunningBomb
 	{
 		#region Junction Factories
 		/// <summary>
+		/// Chooses the random clutter factory which populates the
+		/// contents of a junction.
+		/// </summary>
+		public static IClutterFactory ChooseClutterFactory(
+			MersenneRandom random)
+		{
+			return new SimpleClutterFactory();
+		}
+
+		/// <summary>
 		/// Selects a random junction factory. For a given seed, this
 		/// will always return the same junction.
 		/// </summary>

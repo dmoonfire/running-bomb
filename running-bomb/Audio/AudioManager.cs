@@ -115,7 +115,7 @@ namespace RunningBomb.Audio
 				// See if we have a score
 				if (State.Score != null)
 				{
-					return Math.Max(4,
+					return Math.Max(2,
 						State.Score.Stress * Constants.MaximumBeatsPerLoop);
 				}
 
@@ -189,6 +189,16 @@ namespace RunningBomb.Audio
 		private static double lastBeat;
 		private static int beatIndex;
 		private static double lastAlter;
+		private static bool areBackgroundSamplesPaused;
+
+		/// <summary>
+		/// This is true if the background samples are played.
+		/// </summary><
+		public static bool AreBackgroundSamplesPaused
+		{
+			get { return areBackgroundSamplesPaused; }
+			set { areBackgroundSamplesPaused = value; }
+		}
 
 		/// <summary>
 		/// Processes the sound generation for background music.
@@ -199,57 +209,60 @@ namespace RunningBomb.Audio
 			if (loopChunks.Count == 0)
 				return;
 
-			// Add to the counters
-			lastBeat += args.SecondsSinceLastUpdate;
-			lastAlter += args.SecondsSinceLastUpdate;
-
-			// If we exceeded the time for altering, update something
-			if (lastAlter >= Constants.AudioUpdateSpeed)
+			if (!AreBackgroundSamplesPaused)
 			{
-				// Decrement it so we only change on occasion
-				lastAlter -= Constants.AudioUpdateSpeed;
-
-				// Alter something
-				int index = random.Next(0, Constants.MaximumAudioSamples);
-				int bit = random.Next(0, Constants.MaximumBeatsPerLoop);
-
-				// We basically XOR the random bit
-				loopRhythms[index] = loopRhythms[index] ^ (1 << bit);
-			}
-
-			// See if we need to update our beat samples
-			if (lastBeat >= SecondsPerBeat)
-			{
-				// Make a bit of noise
-				//Log.Debug("--- BEAT ---");
-
-				// Decrement it
-				lastBeat -= SecondsPerBeat;
-
-				// Go through and start playing the samples
-				int bitIndex = 1 << beatIndex;
-
-				for (int i = 0; i < Constants.MaximumAudioSamples; i++)
+				// Add to the counters
+				lastBeat += args.SecondsSinceLastUpdate;
+				lastAlter += args.SecondsSinceLastUpdate;
+				
+				// If we exceeded the time for altering, update something
+				if (lastAlter >= Constants.AudioUpdateSpeed)
 				{
-					// See if we are set
-					if ((loopRhythms[i] & bitIndex) != 0)
+					// Decrement it so we only change on occasion
+					lastAlter -= Constants.AudioUpdateSpeed;
+					
+					// Alter something
+					int index = random.Next(0, Constants.MaximumAudioSamples);
+					int bit = random.Next(0, Constants.MaximumBeatsPerLoop);
+					
+					// We basically XOR the random bit
+					loopRhythms[index] = loopRhythms[index] ^ (1 << bit);
+				}
+				
+				// See if we need to update our beat samples
+				if (lastBeat >= SecondsPerBeat)
+				{
+					// Make a bit of noise
+					//Log.Debug("--- BEAT ---");
+					
+					// Decrement it
+					lastBeat -= SecondsPerBeat;
+					
+					// Go through and start playing the samples
+					int bitIndex = 1 << beatIndex;
+					
+					for (int i = 0; i < Constants.MaximumAudioSamples; i++)
 					{
-						// Start playing it
-						int results = 
-							SdlMixer.Mix_PlayChannel(-1, loopChunks[i], 1);
-
-						if (results == -1)
+						// See if we are set
+						if ((loopRhythms[i] & bitIndex) != 0)
 						{
-							// We had a problem
-							Log.Info("Cannot start sample {0}: {1}",
-								i, SdlMixer.Mix_GetError());
+							// Start playing it
+							int results = 
+								SdlMixer.Mix_PlayChannel(-1, loopChunks[i], 0);
+							
+							if (results == -1)
+							{
+								// We had a problem
+								Log.Info("Cannot start sample {0}: {1}",
+									i, SdlMixer.Mix_GetError());
+							}
 						}
 					}
+					
+					// Increment the index
+					int maxBeats = (int) BeatsPerLoop;
+					beatIndex = (beatIndex + 1) % maxBeats;
 				}
-
-				// Increment the index
-				int maxBeats = (int) BeatsPerLoop;
-				beatIndex = (beatIndex + 1) % maxBeats;
 			}
 		}
 		#endregion

@@ -1,5 +1,6 @@
 using MfGames.RunningBomb;
 using MfGames.Sprite3.BooWorks;
+using MfGames.Utility;
 using RunningBomb.Audio;
 
 namespace RunningBomb
@@ -22,6 +23,7 @@ namespace RunningBomb
 			State.JunctionManager.Junction = new Junction();
 			State.Physics.Add(State.Player);
 			State.Score.Countdown = Constants.StartingCountdown;
+			State.Score.Explosion = -Entropy.NextFloat() * 10;
 
 			// Set up the view state
 			ViewState.Scale = 0.5f;
