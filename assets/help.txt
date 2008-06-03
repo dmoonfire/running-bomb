@@ -17,6 +17,7 @@ control your ship.
   2 - Down
   4 - Left
   0 - Brakes - Slows you down
+  Enter - Reduce your size.
 
   [ - Zoom in
   ] - Zoom out
@@ -26,3 +27,9 @@ control your ship.
 Actually <Escape> will get you out of most screens
 in the game and to quit in a hurry, just hit
 <Escape> a few times in rapid succession.
+
+=2 Modules
+
+You want to get the blue and green modules. The
+blue ones make you go faster and the green ones
+slow down the countdown.

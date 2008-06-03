@@ -11,9 +11,11 @@ namespace MfGames.RunningBomb
 	/// game. This can be the player ship, clutter, or anything else
 	/// that can be reasonably shot, moved, or struck.
 	/// </summary>
-	public class Mobile
+	public abstract class Mobile
 	{
 		#region Properties
+		private float radius = 10;
+
 		/// <summary>
 		/// Returns the angle of the mobile.
 		/// </summary>
@@ -21,6 +23,23 @@ namespace MfGames.RunningBomb
 		{
 			get { return PhysicsBody.State.Position.Angular; }
 		}
+
+		/// <summary>
+		/// Gets the area of a circle.
+		/// </summary>
+		public float Area
+		{
+			get
+			{
+				// Returns the area of the a circle or PI * r**2.
+				return Constants.PI * radius * radius;
+			}
+		}
+
+		/// <summary>
+		/// Returns the color of this mobile.
+		/// </summary>
+		public abstract Color Color { get; }
 
 		/// <summary>
 		/// Contains the relative point of this mobile to the root
@@ -42,12 +61,30 @@ namespace MfGames.RunningBomb
 				PhysicsBody.State.Position.Linear.Y = value.Y;
 			}
 		}
+
+		/// <summary>
+		/// Contains the radius of the bubble.
+		/// </summary>
+		public virtual float Radius
+		{
+			get { return radius; }
+			set
+			{
+				if (value <= 0)
+					throw new Exception("Cannot set an empty radius");
+
+				radius = value;
+			}
+		}
 		#endregion
 
 		#region Physics Information
 		private Body physicsBody;
 
-		public Body PhysicsBody
+		/// <summary>
+		/// Gets the physics body for this mobile.
+		/// </summary>
+		public virtual Body PhysicsBody
 		{
 			get
 			{
@@ -58,22 +95,42 @@ namespace MfGames.RunningBomb
 				// Create the body
 				physicsBody = new Body(
 					new PhysicsState(),
-					new PolygonShape(
-						VertexHelper.CreateRectangle(40, 40), 2),
-					3,
-					new Coefficients(0.75f, 0.5f),
+					PhysicsShape,
+					0.0001f,
+					new Coefficients(0.95f, 0.75f),
 					new Lifespan());
 				physicsBody.IsCollidable = true;
+				physicsBody.Tag = this;
+				CreatedPhysicsBody(physicsBody);
 				return physicsBody;
+			}
+		}
+
+		/// <summary>
+		/// Creates the shape of the bubble module.
+		/// </summary>
+		protected virtual IShape PhysicsShape
+		{
+			get
+			{
+				return new PolygonShape(VertexHelper
+					.CreateCircle(Radius, (int) Radius + 6), Radius);
 			}
 		}
 
 		/// <summary>
 		/// Clearws out the physics body.
 		/// </summary>
-		public void ClearPhysicsBody()
+		public virtual void ClearPhysicsBody()
 		{
 			physicsBody = null;
+		}
+
+		/// <summary>
+		/// Called when the physics body is created.
+		/// </summary>
+		protected virtual void CreatedPhysicsBody(Body body)
+		{
 		}
 		#endregion
 

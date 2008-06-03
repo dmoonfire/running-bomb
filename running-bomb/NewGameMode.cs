@@ -26,7 +26,7 @@ namespace RunningBomb
 			State.Score.Explosion = -Entropy.NextFloat() * 10;
 
 			// Set up the view state
-			ViewState.Scale = 0.5f;
+			ViewState.Scale = 1f;
 
 			// Set up our basic sound
 			AudioManager.ResetBackgroundSamples();

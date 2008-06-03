@@ -19,7 +19,8 @@ namespace MfGames.RunningBomb
 		/// <summary>
 		/// Creates a segment from a child junction to its parent.
 		/// </summary>
-		public Segment Create(Junction child, PointF childPoint)
+		public Segment Create(
+			Junction child, PointF childPoint, double distance)
 		{
 			// Sanity checking
 			if (child.ParentJunction == null)
@@ -57,6 +58,10 @@ namespace MfGames.RunningBomb
 			// point, unioning the results to get the shape of the
 			// entire segment.
 			IPoly shape = null;
+			float log = 0;
+
+			if (distance > 0)
+				log = (float) Math.Log(distance) * 10;
 
 			foreach (CenterPoint point in points)
 			{
@@ -67,7 +72,7 @@ namespace MfGames.RunningBomb
 				{
 					// Create a shape
 					IPoly p = Geometry.CreateShape(parent, point.Point,
-						retry * Constants.SegmentAverageWidth);
+						retry * (Constants.SegmentAverageWidth - log));
 
 					// If we have no shape, this is automatically
 					// included.

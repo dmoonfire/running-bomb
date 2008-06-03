@@ -1,3 +1,5 @@
+using System.Drawing;
+
 namespace MfGames.RunningBomb
 {
 	/// <summary>
@@ -5,7 +7,11 @@ namespace MfGames.RunningBomb
 	/// radius).
 	/// </summary>
 	public class HousingBubble
-	: MobileBubble
+	: Mobile
 	{
+		/// <summary>
+		/// Returns the color of this mobile.
+		/// </summary>
+		public override Color Color { get { return Color.White; } }
 	}
 }

@@ -45,6 +45,14 @@ namespace MfGames.RunningBomb
 
 		#region Physics2D
 		PhysicsEngine engine;
+
+		/// <summary>
+		/// Contains the currently allowed engine.
+		/// </summary>
+		public PhysicsEngine Engine
+		{
+			get { return engine; }
+		}
 		#endregion
 
 		#region Update

@@ -19,7 +19,7 @@ namespace MfGames.RunningBomb
 			// them in the stage.
 			MersenneRandom random = segment.ParentJunction.Random;
 			Junction junction = segment.ChildJunction;
-			int moduleCount = junction.Random.Next(0, 20);
+			int moduleCount = junction.Random.Next(0, 40);
 
 			for (int i = 0; i < moduleCount; i++)
 			{
@@ -49,14 +49,22 @@ namespace MfGames.RunningBomb
 		private void Create(
 			Segment segment, MersenneRandom random, float x, float y)
 		{
+			// Figure out the type
+			Mobile m = new HousingBubble();
+			int pick = random.Next(10);
+
+			if (pick == 0)
+				m = new ContainmentModule();
+			else if (pick < 5)
+				m = new EngineModule();
+
 			// Create a housing bubble
 			PointF p = segment.ChildJunctionPoint;
-			HousingBubble hb = new HousingBubble();		   
-			hb.Point = new PointF(p.X + x, p.Y + y);
-			hb.Radius = random.NextSingle(10, 50);
+			m.Point = new PointF(p.X + x, p.Y + y);
+			m.Radius = random.NextSingle(5, 20);
 
 			// Add it
-			segment.ParentJunction.Mobiles.Add(hb);
+			segment.ParentJunction.Mobiles.Add(m);
 		}
 	}
 }

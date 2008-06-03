@@ -10,6 +10,6 @@ namespace MfGames.RunningBomb
 		/// <summary>
 		/// Creates a segment from a child junction to its parent.
 		/// </summary>
-		Segment Create(Junction childJunction, PointF childPoint);
+		Segment Create(Junction childJunction, PointF childPoint, double distance);
 	}
 }

@@ -83,14 +83,6 @@ namespace RunningBomb
 			}
 		}
 
-		/// <summary>
-		/// Triggered when an object hits something.
-		/// </summary>
-		private void OnBodyCollided(object sender, EventArgs args)
-		{
-			Log.Info("Collission!");
-		}
-
 		/// <summary.
 		/// Renders out the various junction shapes to the user.
 		/// </summary>
@@ -102,12 +94,13 @@ namespace RunningBomb
 				RenderPolygon(
 					(PolygonShape) body.Shape,
 					PointF.Empty,
-					body.Matrices.ToWorld);
+					0);
+				//body.Matrices.ToWorld);
 			}
 		}
 
 		private void RenderPolygon(
-			PolygonShape pps, PointF point, Matrix2x3 matrix)
+			PolygonShape pps, PointF point, double angle)
 		{
 			/* HACK: This is a hack. I couldn't figure out the
 			// calculations at this point, so I just dove into the
@@ -117,20 +110,20 @@ namespace RunningBomb
 			// physics object
 			for (int i = 0; i < pps.Vertexes.Length; i++)
 			{
+				// Figure out what two vertexes we care about
 				Vector2D v1, v2;
 				int i1 = i;
 				int i2 = i + 1;
 				
 				if (i2 >= pps.Vertexes.Length)
 					i2 = 0;
-				
-				Vector2D.Transform(ref matrix,
-					ref pps.Vertexes[i1], out v1);
-				Vector2D.Transform(ref matrix,
-					ref pps.Vertexes[i2], out v2);
+
+				v1 = pps.Vertexes[i1];
+				v2 = pps.Vertexes[i2];
+
 				PointF p1 = ToPoint(v1.X + point.X, v1.Y + point.Y);
 				PointF p2 = ToPoint(v2.X + point.X, v2.Y + point.Y);
-				
+
 				Color color = Color.Gray;
 
 				if (State.Score.Countdown == 0)
@@ -145,10 +138,24 @@ namespace RunningBomb
 		/// </summary>
 		private void Render(Mobile mobile)
 		{
+			// Render a circle of the appropriate location with the
+			// proper color and shape.
+			PointF cp = ToPoint(mobile.Point.X, mobile.Point.Y);
+
+			Paint.FilledCircle(cp.X, cp.Y,
+				mobile.Radius * ViewState.Scale,
+				mobile.Color);
+
+			Paint.Circle(cp.X, cp.Y,
+				mobile.Radius * ViewState.Scale,
+				Color.Black);
+
 			// See if we are in the physics
+			/* DEBUGGING
 			RenderPolygon((PolygonShape) mobile.PhysicsBody.Shape,
 				mobile.Point,
-				mobile.PhysicsBody.Matrices.ToWorld);
+				mobile.PhysicsBody.State.Position.Angular);
+			*/
 		}
 
 		/// <summary>

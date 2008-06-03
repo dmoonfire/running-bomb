@@ -59,7 +59,7 @@ namespace MfGames.RunningBomb
 		/// <summary>
 		/// The average width, in meters, of a segment.
 		/// </summary>
-		public const int SegmentAverageWidth = 150;
+		public const int SegmentAverageWidth = 250;
 
 		/// <summary>
 		/// The average width, in meters, of a junction node.

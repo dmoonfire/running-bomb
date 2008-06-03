@@ -346,7 +346,7 @@ namespace MfGames.RunningBomb
 				// Get the segment factory and create the segment
 				ISegmentFactory isf =
 					FactoryManager.ChooseSegmentFactory(junction);
-				Segment segment = isf.Create(junction, point);
+				Segment segment = isf.Create(junction, point, Distance);
 				segment.ParentJunction = this;
 				segment.ChildJunction = junction;
 				segment.ChildJunctionPoint = point;

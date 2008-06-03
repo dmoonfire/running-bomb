@@ -77,12 +77,14 @@ namespace RunningBomb
 			AudioManager.Update(args);
 
 			// Process our keyboard
-			float s = (float) args.SecondsSinceLastUpdate * 100;
+			float s = (float) args.SecondsSinceLastUpdate;
             
             if (Core.InputManager.IsActivated(InputTokens.NumPad7))
-				State.Player.PhysicsBody.State.Velocity.Angular += s / 100;
+				State.Player.PhysicsBody.State.Velocity.Angular +=
+					(float) Math.Pow(State.Player.Area, 0.5) * s;
             if (Core.InputManager.IsActivated(InputTokens.NumPad9))
-				State.Player.PhysicsBody.State.Velocity.Angular -= s / 100;
+				State.Player.PhysicsBody.State.Velocity.Angular -=
+					(float) Math.Pow(State.Player.Area, 0.5) * s;
 
             if (Core.InputManager.IsActivated(InputTokens.NumPad6))
 				Apply(s, 3);
@@ -94,15 +96,31 @@ namespace RunningBomb
 				Apply(s, 2);
 
 			if (Core.InputManager.IsActivated(InputTokens.OpenBracket))
-				ViewState.Scale += s / 100;
+				ViewState.Scale *= 1.25f;
 			if (Core.InputManager.IsActivated(InputTokens.CloseBracket))
-				ViewState.Scale -= s / 100;
+				ViewState.Scale /= 1.25f;
 
+			// Brakes
 			if (Core.InputManager.IsActivated(InputTokens.NumPad0))
 			{
-				State.Player.PhysicsBody.State.Velocity.Angular = 0;
-				State.Player.PhysicsBody.State.Velocity.Linear.X = 0;
-				State.Player.PhysicsBody.State.Velocity.Linear.Y = 0;
+				State.Player.PhysicsBody.LinearDamping = 0.75f;
+			}
+			else
+			{
+				State.Player.PhysicsBody.LinearDamping = 1.00f;
+			}
+
+			// Shed
+			if (Core.InputManager.IsActivated(InputTokens.NumPadEnter))
+			{
+				State.Player.EnginePower -= 1f * s;
+				State.Player.ContainmentPower -= 1f * s;
+
+				if (State.Player.EnginePower < 10)
+					State.Player.EnginePower = 10;
+
+				if (State.Player.ContainmentPower < 0)
+					State.Player.ContainmentPower = 0;
 			}
 
 			// Update the timer
@@ -145,6 +163,7 @@ namespace RunningBomb
 			// Calculate the amount of time remaining
 			double seconds =
 				args.SecondsSinceLastUpdate * State.Score.CountdownMultiplier;
+			seconds /= 1 + Math.Log(State.Player.ContainmentPower);
 			State.Score.Countdown -= (float) seconds;
 
 			// If we are less than zero, boom.
@@ -163,11 +182,7 @@ namespace RunningBomb
 		{
 			float angle = State.Player.Angle;
 			float a = angle + (float) (Math.PI / 2) * count;
-			float cos = (float) Math.Cos(a) * force * 1000;
-			float sin = (float) Math.Sin(a) * force * 1000;
-
-			State.Player.PhysicsBody.ApplyForce(
-				new Vector2D(cos, sin));
+			State.Player.ApplyForce(a, force);
 		}
 
 		#region Events
